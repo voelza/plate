@@ -1,0 +1,24 @@
+<import file="Header.html" name="the-header"/>
+<import file="content/Post.html" name="Post"/>
+
+<template>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+    <the-header $$title="'Hello!'"/>
+    <main>
+        <Rendered if="posts.length > 0">
+            <ForEach list="posts" name="post">
+                <post>
+                    $${post.content}
+                </post>
+            </ForEach>
+        </Rendered>
+    </main>
+    </body>
+    </html>
+</template>
