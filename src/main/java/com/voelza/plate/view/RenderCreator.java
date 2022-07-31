@@ -16,16 +16,21 @@ class RenderCreator {
         // hide
     }
 
-    static List<Render> create(final List<Element> elements, final Map<String, View> subViews) {
-        final List<Render> renders = new ArrayList<>();
+    static List<ElementRender> create(final List<Element> elements, final Map<String, View> subViews) {
+        final List<ElementRender> renders = new ArrayList<>();
         for (final Element element : elements) {
             final View subView = subViews.get(element.name());
             if (subView != null) {
-                renders.add(new ComponentRender(element, subView));
+                renders.add(new ComponentElementRender(element, subView, subViews));
                 continue;
             }
 
-            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubView(subViews)) {
+            if (element.name().equalsIgnoreCase("slot")) {
+                renders.add(new SlotElementRender(element));
+                continue;
+            }
+
+            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubViewOrSlot(subViews)) {
                 renders.add(createStaticRender(element));
                 continue;
             }
@@ -34,15 +39,15 @@ class RenderCreator {
         return renders;
     }
 
-    private static Render createStaticRender(final Element element) {
-        return new StaticRender(RenderCreator.createStaticHTML(element));
+    private static ElementRender createStaticRender(final Element element) {
+        return new StaticElementRender(RenderCreator.createStaticHTML(element));
     }
 
-    private static Render createTemplatedRender(final Element element, final Map<String, View> subViews) {
+    private static ElementRender createTemplatedRender(final Element element, final Map<String, View> subViews) {
         if (element instanceof TextElement textElement) {
             // TODO allow HTML
             final String text = textElement.text().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-            return new TemplatedTextRender((expressionResolver) -> {
+            return new TemplatedTextElementRender((expressionResolver) -> {
                 final Pattern p = Pattern.compile(Syntax.TEXT_TEMPLATE_REGEX.token);
                 return p.matcher(text).replaceAll(r -> {
                     final String expression = r.group(1);
@@ -53,7 +58,7 @@ class RenderCreator {
 
         final boolean isStandAloneTag = element.isStandAloneTag();
         final String staticStartingTag = element.attributesAreTemplated() ? null : createStaticStartingTag(element);
-        final List<Render> attributeRenders = element.attributesAreTemplated()
+        final List<AttributeRender> attributeRenders = element.attributesAreTemplated()
                 ? element
                 .attributes()
                 .stream()
@@ -77,13 +82,13 @@ class RenderCreator {
             return createTemplatedStartingTag(element.name(), attributeRenders, expressionResolver);
         };
 
-        List<Render> childRenders = null;
+        List<ElementRender> childRenders = null;
         String closingTag = null;
         if (!isStandAloneTag) {
             childRenders = create(element.children(), subViews);
             closingTag = createClosingTag(element);
         }
-        return new TemplatedRender(isStandAloneTag, startingTag, childRenders, closingTag);
+        return new TemplatedElementRender(isStandAloneTag, startingTag, childRenders, closingTag);
     }
 
     private static String createStaticHTML(final Element element) {
@@ -138,7 +143,7 @@ class RenderCreator {
     }
 
     private static String createTemplatedStartingTag(final String name,
-                                                     final List<Render> attributeRenders,
+                                                     final List<AttributeRender> attributeRenders,
                                                      final ExpressionResolver expressionResolver) {
         final StringBuilder html = new StringBuilder();
         html.append("<");
@@ -150,7 +155,7 @@ class RenderCreator {
                             " ",
                             attributeRenders
                                     .stream()
-                                    .map(r -> r.html(expressionResolver))
+                                    .map(r -> r.renderAttribute(expressionResolver))
                                     .toList()
                     )
             );

@@ -2,7 +2,7 @@ package com.voelza.plate.view;
 
 import java.util.function.Function;
 
-class TemplatedAttribute implements Render {
+class TemplatedAttribute implements AttributeRender {
 
     private final Function<ExpressionResolver, String> attributeFunction;
 
@@ -11,7 +11,7 @@ class TemplatedAttribute implements Render {
     }
 
     @Override
-    public String html(final ExpressionResolver expressionResolver) {
+    public String renderAttribute(final ExpressionResolver expressionResolver) {
         return attributeFunction.apply(expressionResolver);
     }
 }

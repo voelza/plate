@@ -5,6 +5,7 @@ import com.voelza.plate.component.Component;
 import com.voelza.plate.component.ComponentResolver;
 import com.voelza.plate.component.Import;
 import com.voelza.plate.component.Prop;
+import com.voelza.plate.component.Slot;
 import com.voelza.plate.html.Element;
 
 import java.nio.file.Path;
@@ -18,18 +19,20 @@ public class View {
 
     private final String directoryPath;
     private final Locale locale;
-    final List<Render> renders;
+    final List<ElementRender> renders;
     final Map<String, View> subViews;
 
     final List<Prop> props;
+    final List<Slot> slots;
 
     public View(final String path, final Locale locale) {
         this.directoryPath = Path.of(path).getParent().toString();
         this.locale = locale;
-        
+
         final Component component = getComponent(path, locale);
         subViews = resolveImports(component.getImports());
         props = component.getProps();
+        slots = component.getSlots();
         final List<Element> elements = component.getTemplate().map(Element::children).orElse(Collections.emptyList());
         renders = RenderCreator.create(elements, subViews);
     }
@@ -47,13 +50,12 @@ public class View {
         return subView;
     }
 
-    public String render(Model model) {
-        final ExpressionResolver expressionResolver = new ExpressionResolver(model);
+    public String render(final Model model) {
+        return render(model, Collections.emptyMap());
+    }
 
-        final StringBuilder html = new StringBuilder();
-        for (final Render render : renders) {
-            html.append(render.html(expressionResolver));
-        }
-        return html.toString();
+    String render(final Model model, Map<String, SlotFill> slotFills) {
+        final ExpressionResolver expressionResolver = new ExpressionResolver(model);
+        return Renderer.render(renders, new RenderOptions(expressionResolver, slotFills));
     }
 }

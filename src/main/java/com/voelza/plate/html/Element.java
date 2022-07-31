@@ -29,9 +29,14 @@ public interface Element {
         return attributes().stream().anyMatch(Attribute::isTemplated);
     }
 
-    default boolean isAnyChildTemplatedOrSubView(final Map<String, View> subViews) {
+    default boolean isAnyChildTemplatedOrSubViewOrSlot(final Map<String, View> subViews) {
         return children().stream()
-                .anyMatch(c -> c.attributesAreTemplated() || subViews.get(c.name()) != null || c.isAnyChildTemplatedOrSubView(subViews));
+                .anyMatch(
+                        c -> c.attributesAreTemplated()
+                                || c.name().equalsIgnoreCase("slot")
+                                || subViews.get(c.name()) != null
+                                || c.isAnyChildTemplatedOrSubViewOrSlot(subViews)
+                );
     }
 
     default Optional<Attribute> getAttribute(final String name) {
@@ -45,12 +50,13 @@ public interface Element {
                 .toList();
     }
 
-    default List<Element> findElementByName(final String name) {
-        final List<Element> foundElements = new ArrayList<>(findChildrenByName(name)
-                .stream()
-                .map(c -> c.findChildrenByName(name))
-                .flatMap(List::stream)
-                .toList());
+    default List<Element> findElementsByName(final String name) {
+        final List<Element> foundElements = new ArrayList<>(
+                findChildrenByName(name)
+                        .stream()
+                        .map(c -> c.findElementsByName(name))
+                        .flatMap(List::stream)
+                        .toList());
 
         if (name().equalsIgnoreCase(name)) {
             foundElements.add(this);
@@ -62,5 +68,9 @@ public interface Element {
 
     default Optional<Element> firstChild() {
         return children().stream().findFirst();
+    }
+
+    default Optional<Element> firstChildByName(final String name) {
+        return children().stream().filter(c -> c.name().equalsIgnoreCase(name)).findFirst();
     }
 }

@@ -5,6 +5,7 @@ import com.voelza.plate.html.DOM;
 import com.voelza.plate.html.Element;
 import com.voelza.plate.html.TextElement;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,12 +61,15 @@ public class Component {
 
     private List<Slot> findSlots(final DOM dom) {
         final List<Slot> slots = dom
-                .getElements()
-                .stream()
-                .map(e -> e.findElementByName("slot"))
-                .flatMap(List::stream)
-                .map(Component::createSlot)
-                .toList();
+                .getFirstElementByName("template")
+                .map(t ->
+                        t.children()
+                                .stream()
+                                .map(e -> e.findElementsByName("slot"))
+                                .flatMap(List::stream)
+                                .map(Component::createSlot)
+                                .toList())
+                .orElse(Collections.emptyList());
 
         boolean foundDefaultSlot = false;
         for (final Slot slot : slots) {

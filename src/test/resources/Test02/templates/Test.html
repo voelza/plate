@@ -12,9 +12,9 @@
     <the-header $$title="'Hello!'"></the-header>
     <main>
         <Rendered if="posts.length > 0">
-            <ForEach list="posts" name="post">
+            <ForEach list="peoples" name="person">
                 <post>
-                    $${post.content}
+                    <default>$${title} $${person.name}</default>
                 </post>
             </ForEach>
         </Rendered>
