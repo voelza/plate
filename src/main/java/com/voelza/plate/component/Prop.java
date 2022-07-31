@@ -3,9 +3,9 @@ package com.voelza.plate.component;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
-class Prop {
-    final String name;
-    final boolean inScript;
+public class Prop {
+    public final String name;
+    public final boolean inScript;
 
     Prop(final Element propElement) {
         name = propElement

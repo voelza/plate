@@ -7,6 +7,7 @@ import com.voelza.plate.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -15,14 +16,20 @@ class RenderCreator {
         // hide
     }
 
-    static List<Render> create(final List<Element> elements) {
+    static List<Render> create(final List<Element> elements, final Map<String, View> subViews) {
         final List<Render> renders = new ArrayList<>();
         for (final Element element : elements) {
-            if (!element.attributesAreTemplated() && !element.isAnyChildTemplated()) {
-                renders.add(createStaticRender(element));
-            } else {
-                renders.add(createTemplatedRender(element));
+            final View subView = subViews.get(element.name());
+            if (subView != null) {
+                renders.add(new ComponentRender(element, subView));
+                continue;
             }
+
+            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubView(subViews)) {
+                renders.add(createStaticRender(element));
+                continue;
+            }
+            renders.add(createTemplatedRender(element, subViews));
         }
         return renders;
     }
@@ -31,7 +38,7 @@ class RenderCreator {
         return new StaticRender(RenderCreator.createStaticHTML(element));
     }
 
-    private static Render createTemplatedRender(final Element element) {
+    private static Render createTemplatedRender(final Element element, final Map<String, View> subViews) {
         if (element instanceof TextElement textElement) {
             // TODO allow HTML
             final String text = textElement.text().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -73,7 +80,7 @@ class RenderCreator {
         List<Render> childRenders = null;
         String closingTag = null;
         if (!isStandAloneTag) {
-            childRenders = create(element.children());
+            childRenders = create(element.children(), subViews);
             closingTag = createClosingTag(element);
         }
         return new TemplatedRender(isStandAloneTag, startingTag, childRenders, closingTag);

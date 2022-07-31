@@ -39,4 +39,11 @@ public class PlateTest {
         test("src/test/resources/Test00/", model);
     }
 
+    @Test
+    public void templatedTest01() throws IOException {
+        final Model model = new Model();
+        model.add("color", "green");
+        test("src/test/resources/Test01/", model);
+    }
+
 }

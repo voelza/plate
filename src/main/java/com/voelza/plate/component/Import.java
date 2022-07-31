@@ -4,8 +4,8 @@ import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
 public class Import {
-    final String file;
-    final String name;
+    public final String file;
+    public final String name;
 
     Import(final Element importElement) {
         file = importElement

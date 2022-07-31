@@ -1,8 +1,11 @@
 package com.voelza.plate.html;
 
+import com.voelza.plate.view.View;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface Element {
@@ -26,8 +29,9 @@ public interface Element {
         return attributes().stream().anyMatch(Attribute::isTemplated);
     }
 
-    default boolean isAnyChildTemplated() {
-        return children().stream().anyMatch(c -> c.attributesAreTemplated() || c.isAnyChildTemplated());
+    default boolean isAnyChildTemplatedOrSubView(final Map<String, View> subViews) {
+        return children().stream()
+                .anyMatch(c -> c.attributesAreTemplated() || subViews.get(c.name()) != null || c.isAnyChildTemplatedOrSubView(subViews));
     }
 
     default Optional<Attribute> getAttribute(final String name) {
