@@ -15,7 +15,7 @@ class PropFill {
                 .getAttribute(Syntax.TEMPLATED.token + propName)
                 .map(Attribute::value)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(String.format("Prop %s was defined but is not set in your template.", propName))
+                        new IllegalArgumentException(String.format("Prop '%s' was defined but is not set in your template.", propName))
                 );
     }
 }

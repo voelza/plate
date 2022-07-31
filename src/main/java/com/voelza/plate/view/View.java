@@ -51,11 +51,11 @@ public class View {
     }
 
     public String render(final Model model) {
-        return render(model, Collections.emptyMap());
+        return render(model, Collections.emptyMap(), null);
     }
 
-    String render(final Model model, Map<String, SlotFill> slotFills) {
+    String render(final Model model, Map<String, SlotFill> slotFills, final ExpressionResolver parentExpressionResolver) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);
-        return Renderer.render(renders, new RenderOptions(expressionResolver, slotFills));
+        return Renderer.render(renders, new RenderContext(expressionResolver, slotFills, parentExpressionResolver));
     }
 }

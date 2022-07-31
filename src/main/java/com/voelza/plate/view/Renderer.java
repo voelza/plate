@@ -8,22 +8,22 @@ class Renderer {
         // hide
     }
 
-    static String render(final List<ElementRender> renders, final RenderOptions renderOptions) {
+    static String render(final List<ElementRender> renders, final RenderContext renderContext) {
         final StringBuilder html = new StringBuilder();
         for (final ElementRender render : renders) {
-            html.append(render(render, renderOptions));
+            html.append(render(render, renderContext));
         }
         return html.toString();
     }
 
-    private static String render(final ElementRender render, final RenderOptions renderOptions) {
+    private static String render(final ElementRender render, final RenderContext renderContext) {
         if (render instanceof SlotElementRender slotRender) {
-            final SlotFill slotFill = renderOptions.slotFills().get(slotRender.name);
+            final SlotFill slotFill = renderContext.slotFills().get(slotRender.name);
             if (slotFill == null) {
                 throw new IllegalStateException(String.format("Slot %s was not filled.", slotRender.name));
             }
-            return slotFill.render(renderOptions.expressionResolver());
+            return slotFill.render(renderContext);
         }
-        return render.renderHTML(renderOptions);
+        return render.renderHTML(renderContext);
     }
 }

@@ -29,11 +29,11 @@ class ComponentElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderOptions renderOptions) {
+    public String renderHTML(final RenderContext renderContext) {
         final Model model = new Model();
         for (final PropFill propFill : propFills) {
-            model.add(propFill.name, renderOptions.expressionResolver().evaluate(propFill.propExpression));
+            model.add(propFill.name, renderContext.expressionResolver().evaluate(propFill.propExpression));
         }
-        return view.render(model, this.slotFills);
+        return view.render(model, this.slotFills, renderContext.expressionResolver());
     }
 }

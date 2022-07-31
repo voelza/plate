@@ -45,5 +45,4 @@ public class PlateTest {
         model.add("color", "green");
         test("src/test/resources/Test01/", model);
     }
-
 }

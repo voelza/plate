@@ -11,7 +11,7 @@ class TemplatedTextElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderOptions renderOptions) {
-        return this.text.apply(renderOptions.expressionResolver());
+    public String renderHTML(final RenderContext renderContext) {
+        return this.text.apply(renderContext.expressionResolver());
     }
 }

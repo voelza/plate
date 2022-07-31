@@ -21,7 +21,12 @@ class SlotFill {
         renders = RenderCreator.create(slotElements, subViews);
     }
 
-    String render(final ExpressionResolver expressionResolver) {
-        return Renderer.render(renders, new RenderOptions(expressionResolver, Collections.emptyMap()));
+    String render(final RenderContext renderContext) {
+        return Renderer.render(renders,
+                new RenderContext(
+                        ExpressionResolver.merge(renderContext.expressionResolver(), renderContext.parentExpressionResolver()),
+                        Collections.emptyMap(),
+                        null
+                ));
     }
 }
