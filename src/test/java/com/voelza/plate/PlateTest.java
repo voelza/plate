@@ -22,6 +22,7 @@ public class PlateTest {
         final View view = new View(testDir + "templates/Test.html", Locale.ENGLISH);
         assertThat(view.render(model), is(loadResultFile(testDir + "result/index.html")));
         assertThat(view.getCSS(), is(loadResultFile(testDir + "result/index.css")));
+        assertThat(view.getJavaScript(), is(loadResultFile(testDir + "result/index.js")));
     }
 
     @Test

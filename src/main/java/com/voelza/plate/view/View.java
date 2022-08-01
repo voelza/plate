@@ -31,6 +31,9 @@ public class View {
     private final String declaredCSS;
     private final String viewCSS;
 
+    private final String declaredJavaScript;
+    private final String viewJavaScript;
+
     public View(final String path, final Locale locale) {
         this(path, locale, ViewOrigin.ROOT);
     }
@@ -48,6 +51,9 @@ public class View {
 
         declaredCSS = component.getStyle().orElse("");
         viewCSS = ViewOrigin.ROOT == viewOrigin ? collectCSS(this.name, declaredCSS, subViews) : null;
+
+        declaredJavaScript = component.getScript().orElse("");
+        viewJavaScript = ViewOrigin.ROOT == viewOrigin ? collectJavaScript(declaredJavaScript, subViews) : null;
 
         props = component.getProps();
         slots = component.getSlots();
@@ -78,6 +84,15 @@ public class View {
         return CSSParser.scopeCSS(declaredCSS, scopePrefix + viewName) + String.join("", cssMap.values());
     }
 
+    private static String collectJavaScript(final String declaredJavaScript, final Map<String, View> subViews) {
+        final Map<String, String> jsMap = subViews
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        (e) -> e.getValue().declaredJavaScript));
+        return declaredJavaScript + String.join("", jsMap.values());
+    }
+
     public String render(final Model model) {
         return render(model, Collections.emptyMap(), null);
     }
@@ -89,5 +104,9 @@ public class View {
 
     public String getCSS() {
         return viewCSS;
+    }
+
+    public String getJavaScript() {
+        return viewJavaScript;
     }
 }
