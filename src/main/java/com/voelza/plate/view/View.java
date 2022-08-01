@@ -6,6 +6,7 @@ import com.voelza.plate.component.ComponentResolver;
 import com.voelza.plate.component.Import;
 import com.voelza.plate.component.Prop;
 import com.voelza.plate.component.Slot;
+import com.voelza.plate.css.CSSParser;
 import com.voelza.plate.html.Element;
 
 import java.nio.file.Path;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class View {
 
+    private final String name;
     private final String directoryPath;
     private final Locale locale;
     final List<ElementRender> renders;
@@ -34,14 +36,18 @@ public class View {
     }
 
     public View(final String path, final Locale locale, final ViewOrigin viewOrigin) {
-        this.directoryPath = Path.of(path).getParent().toString();
+        final Path filePath = Path.of(path);
+        final String fileName = filePath.getFileName().toString();
+        final int extensionIndex = fileName.lastIndexOf(".");
+        this.name = fileName.substring(0, extensionIndex != -1 ? extensionIndex : fileName.length()).toLowerCase();
+        this.directoryPath = filePath.getParent().toString();
         this.locale = locale;
 
         final Component component = getComponent(path, locale);
         subViews = resolveImports(component.getImports());
 
         declaredCSS = component.getStyle().orElse("");
-        viewCSS = ViewOrigin.ROOT == viewOrigin ? collectCSS(component, subViews) : null;
+        viewCSS = ViewOrigin.ROOT == viewOrigin ? collectCSS(this.name, declaredCSS, subViews) : null;
 
         props = component.getProps();
         slots = component.getSlots();
@@ -62,12 +68,14 @@ public class View {
         return subView;
     }
 
-    private static String collectCSS(final Component component, final Map<String, View> subViews) {
+    private static String collectCSS(final String viewName, final String declaredCSS, final Map<String, View> subViews) {
+        final String scopePrefix = "data-p-";
         final Map<String, String> cssMap = subViews
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, (e) -> e.getValue().declaredCSS));
-        return component.getStyle().orElse("") + String.join("", cssMap.values());
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        (e) -> CSSParser.scopeCSS(e.getValue().declaredCSS, scopePrefix + e.getValue().name)));
+        return CSSParser.scopeCSS(declaredCSS, scopePrefix + viewName) + String.join("", cssMap.values());
     }
 
     public String render(final Model model) {

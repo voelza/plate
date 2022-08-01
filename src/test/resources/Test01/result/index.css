@@ -1,8 +1,8 @@
-main {
+main[data-p-test]{
     background-color: blue;
 }
 
-nav {
+nav[data-p-header]{
     width: 100%;
     height: 50px;
     display: flex;
@@ -11,6 +11,6 @@ nav {
     gap: 5px;
 }
 
-.post-content {
+.post-content[data-p-post]{
      font-size: 0.8rem;
 }
