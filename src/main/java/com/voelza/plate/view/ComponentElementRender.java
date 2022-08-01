@@ -17,20 +17,21 @@ class ComponentElementRender implements ElementRender {
     ComponentElementRender(
             final Element element,
             final View view,
-            final Map<String, View> subViews
+            final RenderCreatorOptions options
     ) {
         this.view = view;
         propFills = view.props.stream().map(p -> new PropFill(p.name, element)).toList();
-        slotFills = createSlotFills(element, view, subViews);
+        slotFills = createSlotFills(element, view, options);
     }
 
     private static Map<String, SlotFill> createSlotFills(
             final Element element,
-            final View view, final Map<String, View> subViews
+            final View view,
+            final RenderCreatorOptions options
     ) {
         final Map<String, SlotFill> slotFills = new HashMap<>();
         for (final Slot slot : view.slots) {
-            slotFills.put(slot.name(), new SlotFill(slot.name(), element, subViews, view.additionalDataAttributes));
+            slotFills.put(slot.name(), new SlotFill(slot.name(), element, options));
         }
         return slotFills;
     }

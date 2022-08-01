@@ -1,6 +1,7 @@
 package com.voelza.plate.view;
 
 import com.voelza.plate.Syntax;
+import com.voelza.plate.Version;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 import com.voelza.plate.html.TextElement;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -24,25 +25,23 @@ class RenderCreator {
         // hide
     }
 
-    static List<ElementRender> create(final List<Element> elements,
-                                      final Map<String, View> subViews,
-                                      final List<Attribute> additionalDataAttributes) {
+    static List<ElementRender> create(final RenderCreatorOptions options) {
 
         final List<ElementRender> renders = new ArrayList<>();
-        for (final Element element : elements) {
+        for (final Element element : options.elements()) {
             if ("render".equalsIgnoreCase(element.name())) {
-                renders.add(new ConditionalRender(element, subViews, additionalDataAttributes));
+                renders.add(new ConditionalRender(element, options));
                 continue;
             }
 
             if ("forEach".equalsIgnoreCase(element.name())) {
-                renders.add(new ForEachRender(element, subViews, additionalDataAttributes));
+                renders.add(new ForEachRender(element, options));
                 continue;
             }
 
-            final View subView = subViews.get(element.name());
+            final View subView = options.subViews().get(element.name());
             if (subView != null) {
-                renders.add(new ComponentElementRender(element, subView, subViews));
+                renders.add(new ComponentElementRender(element, subView, options));
                 continue;
             }
 
@@ -51,23 +50,25 @@ class RenderCreator {
                 continue;
             }
 
-            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubViewOrSlot(subViews)) {
-                renders.add(createStaticRender(element, additionalDataAttributes));
+            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubViewOrSlot(options.subViews())) {
+                renders.add(createStaticRender(element, options));
                 continue;
             }
-            renders.add(createTemplatedRender(element, subViews, additionalDataAttributes));
+            renders.add(createTemplatedRender(element, options));
         }
         return renders;
     }
 
-    private static ElementRender createStaticRender(final Element element, final List<Attribute> additionalDataAttributes) {
-        return new StaticElementRender(RenderCreator.createStaticHTML(element, additionalDataAttributes));
+    private static ElementRender createStaticRender(
+            final Element element,
+            final RenderCreatorOptions options
+    ) {
+        return new StaticElementRender(RenderCreator.createStaticHTML(element, options));
     }
 
     private static ElementRender createTemplatedRender(
             final Element element,
-            final Map<String, View> subViews,
-            final List<Attribute> additionalDataAttributes
+            final RenderCreatorOptions options
     ) {
         if (element instanceof TextElement textElement) {
             // TODO allow HTML
@@ -82,11 +83,11 @@ class RenderCreator {
         }
 
         final String staticStartingTag =
-                element.attributesAreTemplated() ? null : createStaticStartingTag(element, additionalDataAttributes);
+                element.attributesAreTemplated() ? null : createStaticStartingTag(element, options);
         final List<AttributeRender> attributeRenders = element.attributesAreTemplated()
                 ?
                 CollectionUtils.union(
-                                getAdditionalAttributes(element, additionalDataAttributes),
+                                getAdditionalAttributes(element, options.additionalDataAttributes()),
                                 element.attributes()
                         )
                         .stream()
@@ -114,23 +115,34 @@ class RenderCreator {
         List<ElementRender> childRenders = null;
         String closingTag = null;
         if (!isStandAloneTag) {
-            childRenders = create(element.children(), subViews, additionalDataAttributes);
+            childRenders = create(options.newElements(element.children()));
+            if ("head".equalsIgnoreCase(element.name())) {
+                createCSSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
+                createJSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
+            }
             closingTag = createClosingTag(element);
         }
         return new TemplatedElementRender(isStandAloneTag, startingTag, childRenders, closingTag);
     }
 
-    private static String createStaticHTML(final Element element, final List<Attribute> additionalDataAttributes) {
+    private static String createStaticHTML(
+            final Element element,
+            final RenderCreatorOptions options
+    ) {
         if (element instanceof TextElement textElement) {
             return textElement.text();
         }
 
         final StringBuilder html = new StringBuilder();
-        html.append(createStaticStartingTag(element, additionalDataAttributes));
+        html.append(createStaticStartingTag(element, options));
 
         if (!element.isStandAloneTag()) {
             for (final Element child : element.children()) {
-                html.append(createStaticHTML(child, additionalDataAttributes));
+                html.append(createStaticHTML(child, options));
+            }
+            if ("head".equalsIgnoreCase(element.name())) {
+                createCSSLink(options).ifPresent(html::append);
+                createJSLink(options).ifPresent(html::append);
             }
             html.append(createClosingTag(element));
         }
@@ -138,13 +150,28 @@ class RenderCreator {
         return html.toString();
     }
 
-    private static String createStaticStartingTag(final Element element, final List<Attribute> additionalDataAttributes) {
+    private static Optional<String> createJSLink(final RenderCreatorOptions options) {
+        if (!options.hasJavaScript()) {
+            return Optional.empty();
+        }
+        return Optional.of(String.format("<script src=\"/plate/js/%s-%s.js\" defer></script>", options.viewName(), Version.get()));
+    }
+
+    private static Optional<String> createCSSLink(final RenderCreatorOptions options) {
+        if (!options.hasCSS()) {
+            return Optional.empty();
+        }
+        return Optional.of(String.format("<link href=\"/plate/css/%s-%s.css\">", options.viewName(), Version.get()));
+    }
+
+    private static String createStaticStartingTag(final Element element,
+                                                  final RenderCreatorOptions options) {
         final StringBuilder html = new StringBuilder();
         html.append("<");
         html.append(element.name());
 
         final Collection<Attribute> attributes = CollectionUtils.union(
-                getAdditionalAttributes(element, additionalDataAttributes),
+                getAdditionalAttributes(element, options.additionalDataAttributes()),
                 element.attributes()
         );
         if (CollectionUtils.isNotEmpty(attributes)) {

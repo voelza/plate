@@ -68,9 +68,14 @@ public class View {
 
         additionalDataAttributes = createAdditionalDataAttributes();
         renders = RenderCreator.create(
-                elements,
-                subViews,
-                additionalDataAttributes
+                new RenderCreatorOptions(
+                        name,
+                        StringUtils.hasText(viewCSS),
+                        StringUtils.hasText(viewJavaScript),
+                        elements,
+                        subViews,
+                        additionalDataAttributes
+                )
         );
     }
 

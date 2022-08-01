@@ -8,21 +8,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 class ForEachRender implements ElementRender {
     private final String collectionExpression;
     private final String elementName;
     private final List<ElementRender> renders;
 
-    ForEachRender(final Element element, final Map<String, View> subViews, final List<Attribute> additionalDataAttributes) {
+    ForEachRender(
+            final Element element,
+            final RenderCreatorOptions options
+    ) {
         this.collectionExpression = element.getAttribute("collection")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("ForEach element needs 'collection' attribute."));
         this.elementName = element.getAttribute("element")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("ForEach element needs 'element' attribute."));
-        this.renders = RenderCreator.create(element.children(), subViews, additionalDataAttributes);
+        this.renders = RenderCreator.create(options.newElements(element.children()));
     }
 
     @Override

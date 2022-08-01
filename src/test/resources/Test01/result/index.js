@@ -1,3 +1,4 @@
-  function alertPostContent() {
-    alert("Post Content!");
-  }
+
+      function alertPostContent() {
+        alert("Post Content!");
+      }
