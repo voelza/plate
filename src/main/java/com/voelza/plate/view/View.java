@@ -12,7 +12,6 @@ import com.voelza.plate.html.Element;
 import com.voelza.plate.utils.StringUtils;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import java.util.stream.Collectors;
 public class View {
 
     private static final String SCOPE_PREFIX = "data-p-";
+    private static final String SETUP_PREFIX = "data-p-setup-";
 
     private final String name;
     private final String directoryPath;
@@ -38,8 +38,6 @@ public class View {
 
     private final String declaredJavaScript;
     private final String viewJavaScript;
-
-    final List<Attribute> additionalDataAttributes;
 
     public View(final String path, final Locale locale) {
         this(path, locale, ViewOrigin.ROOT);
@@ -60,13 +58,15 @@ public class View {
         viewCSS = ViewOrigin.ROOT == viewOrigin ? collectCSS(this.name, declaredCSS, subViews) : null;
 
         declaredJavaScript = component.getScript().orElse("");
-        viewJavaScript = ViewOrigin.ROOT == viewOrigin ? collectJavaScript(declaredJavaScript, subViews) : null;
+        viewJavaScript = ViewOrigin.ROOT == viewOrigin ? collectJavaScript(getDeclaredJavaScript(), subViews) : null;
 
         props = component.getProps();
         slots = component.getSlots();
         final List<Element> elements = component.getTemplate().map(Element::children).orElse(Collections.emptyList());
 
-        additionalDataAttributes = createAdditionalDataAttributes();
+        final Attribute scopeAttribute = StringUtils.hasText(this.declaredCSS) ? new Attribute(SCOPE_PREFIX + this.name, null) : null;
+        final Attribute setupAttribute =
+                StringUtils.hasText(this.declaredJavaScript) ? new Attribute(SETUP_PREFIX + this.name, null) : null;
         renders = RenderCreator.create(
                 new RenderCreatorOptions(
                         name,
@@ -74,17 +74,10 @@ public class View {
                         StringUtils.hasText(viewJavaScript),
                         elements,
                         subViews,
-                        additionalDataAttributes
+                        scopeAttribute,
+                        setupAttribute
                 )
         );
-    }
-
-    private List<Attribute> createAdditionalDataAttributes() {
-        final List<Attribute> attributes = new ArrayList<>();
-        if (StringUtils.hasText(this.declaredCSS)) {
-            attributes.add(new Attribute(SCOPE_PREFIX + this.name, null));
-        }
-        return Collections.unmodifiableList(attributes);
     }
 
     private static Component getComponent(final String path, final Locale locale) {
@@ -114,8 +107,31 @@ public class View {
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
-                        (e) -> e.getValue().declaredJavaScript));
-        return declaredJavaScript + String.join("", jsMap.values());
+                        (e) -> e.getValue().getDeclaredJavaScript()));
+
+        if (!StringUtils.hasText(declaredJavaScript) && jsMap.isEmpty()) {
+            return "";
+        }
+
+        return String.format("const plate = function() {" +
+                        "function setup(selector, setupFunc) {" +
+                        "document" +
+                        ".querySelectorAll(selector)" +
+                        ".forEach(element => {" +
+                        "setupFunc({element});" +
+                        "});" +
+                        "}" +
+                        "%s" +
+                        "}();",
+                declaredJavaScript + String.join("", jsMap.values()));
+    }
+
+    private String getDeclaredJavaScript() {
+        if (!StringUtils.hasText(declaredJavaScript)) {
+            return "";
+        }
+
+        return String.format("setup('[data-p-setup-%s]',({element}) => {%s});", name, declaredJavaScript);
     }
 
     public String render(final Model model) {

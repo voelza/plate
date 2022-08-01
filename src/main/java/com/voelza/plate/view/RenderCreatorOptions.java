@@ -12,9 +12,14 @@ public record RenderCreatorOptions(
         boolean hasJavaScript,
         List<Element> elements,
         Map<String, View> subViews,
-        List<Attribute> additionalDataAttributes) {
+        Attribute scopeAttribute,
+        Attribute setupAttribute) {
 
     RenderCreatorOptions newElements(final List<Element> elements) {
-        return new RenderCreatorOptions(viewName, hasCSS, hasJavaScript, elements, subViews, additionalDataAttributes);
+        return new RenderCreatorOptions(viewName, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, setupAttribute);
+    }
+    
+    RenderCreatorOptions clearSetupAttribute() {
+        return new RenderCreatorOptions(viewName, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, null);
     }
 }

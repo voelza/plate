@@ -9,7 +9,6 @@ import com.voelza.plate.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,12 +20,13 @@ class RenderCreator {
     private static final Set<String> NONE_ADDITIONAL_ATTRS_ELEMENTS =
             Set.of("!doctype", "html", "head", "title", "script", "style", "link", "media", "meta", "base", "noscript");
 
+    private static final Set<String> NONE_SETUP_ATTRS = Set.of("!doctype", "noscript");
+
     private RenderCreator() {
         // hide
     }
 
     static List<ElementRender> create(final RenderCreatorOptions options) {
-
         final List<ElementRender> renders = new ArrayList<>();
         for (final Element element : options.elements()) {
             if ("render".equalsIgnoreCase(element.name())) {
@@ -82,12 +82,10 @@ class RenderCreator {
             });
         }
 
-        final String staticStartingTag =
-                element.attributesAreTemplated() ? null : createStaticStartingTag(element, options);
         final List<AttributeRender> attributeRenders = element.attributesAreTemplated()
                 ?
                 CollectionUtils.union(
-                                getAdditionalAttributes(element, options.additionalDataAttributes()),
+                                getAdditionalAttributes(element, options),
                                 element.attributes()
                         )
                         .stream()
@@ -104,6 +102,7 @@ class RenderCreator {
                         .toList()
                 : null;
 
+        final String staticStartingTag = element.attributesAreTemplated() ? null : createStaticStartingTag(element, options);
         final Function<ExpressionResolver, String> startingTag = (expressionResolver) -> {
             if (staticStartingTag != null) {
                 return staticStartingTag;
@@ -115,7 +114,7 @@ class RenderCreator {
         List<ElementRender> childRenders = null;
         String closingTag = null;
         if (!isStandAloneTag) {
-            childRenders = create(options.newElements(element.children()));
+            childRenders = create(options.newElements(element.children()).clearSetupAttribute());
             if ("head".equalsIgnoreCase(element.name())) {
                 createCSSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
                 createJSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
@@ -138,7 +137,7 @@ class RenderCreator {
 
         if (!element.isStandAloneTag()) {
             for (final Element child : element.children()) {
-                html.append(createStaticHTML(child, options));
+                html.append(createStaticHTML(child, options.clearSetupAttribute()));
             }
             if ("head".equalsIgnoreCase(element.name())) {
                 createCSSLink(options).ifPresent(html::append);
@@ -171,7 +170,7 @@ class RenderCreator {
         html.append(element.name());
 
         final Collection<Attribute> attributes = CollectionUtils.union(
-                getAdditionalAttributes(element, options.additionalDataAttributes()),
+                getAdditionalAttributes(element, options),
                 element.attributes()
         );
         if (CollectionUtils.isNotEmpty(attributes)) {
@@ -190,8 +189,16 @@ class RenderCreator {
         return html.toString();
     }
 
-    private static List<Attribute> getAdditionalAttributes(final Element element, final List<Attribute> additionalDataAttributes) {
-        return !NONE_ADDITIONAL_ATTRS_ELEMENTS.contains(element.name().toLowerCase()) ? additionalDataAttributes : Collections.emptyList();
+    private static List<Attribute> getAdditionalAttributes(final Element element, final RenderCreatorOptions options) {
+        final List<Attribute> additionalAttributes = new ArrayList<>();
+        if (options.scopeAttribute() != null && !NONE_ADDITIONAL_ATTRS_ELEMENTS.contains(element.name().toLowerCase())) {
+            additionalAttributes.add(options.scopeAttribute());
+        }
+        if (options.setupAttribute() != null && !NONE_SETUP_ATTRS.contains(element.name().toLowerCase())) {
+            additionalAttributes.add(options.setupAttribute());
+        }
+
+        return additionalAttributes;
     }
 
     private static String createClosingTag(final Element element) {
