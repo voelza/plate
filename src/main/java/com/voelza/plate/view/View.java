@@ -7,9 +7,12 @@ import com.voelza.plate.component.Import;
 import com.voelza.plate.component.Prop;
 import com.voelza.plate.component.Slot;
 import com.voelza.plate.css.CSSParser;
+import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
+import com.voelza.plate.utils.StringUtils;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class View {
+
+    private static final String SCOPE_PREFIX = "data-p-";
 
     private final String name;
     private final String directoryPath;
@@ -33,6 +38,8 @@ public class View {
 
     private final String declaredJavaScript;
     private final String viewJavaScript;
+
+    final List<Attribute> additionalDataAttributes;
 
     public View(final String path, final Locale locale) {
         this(path, locale, ViewOrigin.ROOT);
@@ -58,7 +65,21 @@ public class View {
         props = component.getProps();
         slots = component.getSlots();
         final List<Element> elements = component.getTemplate().map(Element::children).orElse(Collections.emptyList());
-        renders = RenderCreator.create(elements, subViews);
+
+        additionalDataAttributes = createAdditionalDataAttributes();
+        renders = RenderCreator.create(
+                elements,
+                subViews,
+                additionalDataAttributes
+        );
+    }
+
+    private List<Attribute> createAdditionalDataAttributes() {
+        final List<Attribute> attributes = new ArrayList<>();
+        if (StringUtils.hasText(this.declaredCSS)) {
+            attributes.add(new Attribute(SCOPE_PREFIX + this.name, null));
+        }
+        return Collections.unmodifiableList(attributes);
     }
 
     private static Component getComponent(final String path, final Locale locale) {
@@ -75,13 +96,12 @@ public class View {
     }
 
     private static String collectCSS(final String viewName, final String declaredCSS, final Map<String, View> subViews) {
-        final String scopePrefix = "data-p-";
         final Map<String, String> cssMap = subViews
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
-                        (e) -> CSSParser.scopeCSS(e.getValue().declaredCSS, scopePrefix + e.getValue().name)));
-        return CSSParser.scopeCSS(declaredCSS, scopePrefix + viewName) + String.join("", cssMap.values());
+                        (e) -> CSSParser.scopeCSS(e.getValue().declaredCSS, SCOPE_PREFIX + e.getValue().name)));
+        return CSSParser.scopeCSS(declaredCSS, SCOPE_PREFIX + viewName) + String.join("", cssMap.values());
     }
 
     private static String collectJavaScript(final String declaredJavaScript, final Map<String, View> subViews) {
@@ -99,7 +119,12 @@ public class View {
 
     String render(final Model model, Map<String, SlotFill> slotFills, final ExpressionResolver parentExpressionResolver) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);
-        return Renderer.render(renders, new RenderContext(expressionResolver, slotFills, parentExpressionResolver));
+        return Renderer.render(renders,
+                new RenderContext(
+                        expressionResolver,
+                        slotFills,
+                        parentExpressionResolver
+                ));
     }
 
     public String getCSS() {

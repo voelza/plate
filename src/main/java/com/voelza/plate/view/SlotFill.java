@@ -1,5 +1,6 @@
 package com.voelza.plate.view;
 
+import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
 import java.util.Collections;
@@ -10,7 +11,7 @@ class SlotFill {
 
     private final List<ElementRender> renders;
 
-    SlotFill(final String name, final Element element, Map<String, View> subViews) {
+    SlotFill(final String name, final Element element, final Map<String, View> subViews, final List<Attribute> additionalDataAttributes) {
         final List<Element> slotElements = element.firstChildByName(name)
                 .orElseThrow(
                         () -> new IllegalArgumentException(
@@ -18,7 +19,7 @@ class SlotFill {
                         )
                 )
                 .children();
-        renders = RenderCreator.create(slotElements, subViews);
+        renders = RenderCreator.create(slotElements, subViews, additionalDataAttributes);
     }
 
     String render(final RenderContext renderContext) {

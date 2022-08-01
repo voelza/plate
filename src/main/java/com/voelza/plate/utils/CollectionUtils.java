@@ -1,13 +1,27 @@
 package com.voelza.plate.utils;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CollectionUtils {
     private CollectionUtils() {
         // hide
     }
 
-    public static boolean isNotEmpty(final List<?> list) {
-        return list != null && list.size() > 0;
+    public static boolean isNotEmpty(final Collection<?> collection) {
+        return collection != null && collection.size() > 0;
+    }
+
+    @SafeVarargs
+    public static <T> Collection<T> union(final Collection<T>... collections) {
+        final Set<T> set = new HashSet<T>();
+
+        for (final Collection<T> collection : collections) {
+            set.addAll(collection);
+        }
+
+        return new ArrayList<T>(set);
     }
 }

@@ -11,11 +11,11 @@ class ConditionalRender implements ElementRender {
     private final String condition;
     private final List<ElementRender> renders;
 
-    ConditionalRender(final Element element, final Map<String, View> subViews) {
+    ConditionalRender(final Element element, final Map<String, View> subViews, final List<Attribute> additionalDataAttributes) {
         this.condition = element.getAttribute("if")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("Render element needs 'condition' attribute."));
-        this.renders = RenderCreator.create(element.children(), subViews);
+        this.renders = RenderCreator.create(element.children(), subViews, additionalDataAttributes);
     }
 
     @Override

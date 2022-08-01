@@ -15,14 +15,14 @@ class ForEachRender implements ElementRender {
     private final String elementName;
     private final List<ElementRender> renders;
 
-    ForEachRender(final Element element, final Map<String, View> subViews) {
+    ForEachRender(final Element element, final Map<String, View> subViews, final List<Attribute> additionalDataAttributes) {
         this.collectionExpression = element.getAttribute("collection")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("ForEach element needs 'collection' attribute."));
         this.elementName = element.getAttribute("element")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("ForEach element needs 'element' attribute."));
-        this.renders = RenderCreator.create(element.children(), subViews);
+        this.renders = RenderCreator.create(element.children(), subViews, additionalDataAttributes);
     }
 
     @Override
