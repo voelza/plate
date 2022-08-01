@@ -21,6 +21,7 @@ public class PlateTest {
     private void test(final String testDir, final Model model) throws IOException {
         final View view = new View(testDir + "templates/Test.html", Locale.ENGLISH);
         assertThat(view.render(model), is(loadResultFile(testDir + "result/index.html")));
+        assertThat(view.getCSS(), is(loadResultFile(testDir + "result/index.css")));
     }
 
     @Test
