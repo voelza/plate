@@ -19,6 +19,11 @@ class RenderCreator {
     static List<ElementRender> create(final List<Element> elements, final Map<String, View> subViews) {
         final List<ElementRender> renders = new ArrayList<>();
         for (final Element element : elements) {
+            if ("render".equalsIgnoreCase(element.name())) {
+                renders.add(new ConditionalRender(element, subViews));
+                continue;
+            }
+
             final View subView = subViews.get(element.name());
             if (subView != null) {
                 renders.add(new ComponentElementRender(element, subView, subViews));

@@ -35,4 +35,13 @@ public class ExpressionResolver {
         final JexlExpression e = jexl.createExpression(expression);
         return String.valueOf(e.evaluate(jexlContext));
     }
+
+    public boolean evaluateCondition(final String condition) {
+        final JexlExpression e = jexl.createExpression(condition);
+        final Object result = e.evaluate(jexlContext);
+        if (result instanceof Boolean r) {
+            return r;
+        }
+        throw new IllegalArgumentException(String.format("Condition expression \"%s\" does not result in a boolean value", condition));
+    }
 }

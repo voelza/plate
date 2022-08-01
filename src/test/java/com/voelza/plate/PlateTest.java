@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,5 +45,16 @@ public class PlateTest {
         final Model model = new Model();
         model.add("color", "green");
         test("src/test/resources/Test01/", model);
+    }
+
+    @Test
+    public void templatedTest02() throws IOException {
+        final Model model = new Model();
+        model.add("title", "Website Title");
+        model.add("peoples", List.of(new Person("Achim"), new Person("Joachim")));
+        test("src/test/resources/Test02/", model);
+    }
+
+    public static record Person(String name) {
     }
 }

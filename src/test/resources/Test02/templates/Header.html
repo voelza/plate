@@ -3,6 +3,7 @@
 <template>
     <nav>
         $${title}
+        <Render if="'Hello!'.equals(title)"> World!</Render>
     </nav>
 </template>
 
@@ -15,5 +16,6 @@
         align-items: center;
         gap: 5px;
     }
+
 
 </style>

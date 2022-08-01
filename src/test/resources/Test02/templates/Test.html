@@ -6,18 +6,21 @@
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Title</title>
+        <title>$${title}</title>
     </head>
     <body>
     <the-header $$title="'Hello!'"></the-header>
     <main>
-        <Rendered if="posts.length > 0">
-            <ForEach list="peoples" name="person">
+        <Render if="peoples.size() > 0">
+            <ForEach collection="peoples" element="person">
                 <post>
                     <default>$${title} $${person.name}</default>
                 </post>
             </ForEach>
-        </Rendered>
+        </Render>
+        <Render if="peoples.size() <= 0">
+            There was no person found.
+        </Render>
     </main>
     </body>
     </html>
