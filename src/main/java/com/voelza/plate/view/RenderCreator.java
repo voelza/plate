@@ -24,6 +24,11 @@ class RenderCreator {
                 continue;
             }
 
+            if ("forEach".equalsIgnoreCase(element.name())) {
+                renders.add(new ForEachRender(element, subViews));
+                continue;
+            }
+
             final View subView = subViews.get(element.name());
             if (subView != null) {
                 renders.add(new ComponentElementRender(element, subView, subViews));

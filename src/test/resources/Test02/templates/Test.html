@@ -14,7 +14,7 @@
         <Render if="peoples.size() > 0">
             <ForEach collection="peoples" element="person">
                 <post>
-                    <default>$${title} $${person.name}</default>
+                    <default>$${_index + 1}: $${title} $${person.name()}</default>
                 </post>
             </ForEach>
         </Render>

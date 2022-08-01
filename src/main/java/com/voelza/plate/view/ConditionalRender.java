@@ -14,7 +14,7 @@ class ConditionalRender implements ElementRender {
     ConditionalRender(final Element element, final Map<String, View> subViews) {
         this.condition = element.getAttribute("if")
                 .map(Attribute::value)
-                .orElseThrow(() -> new IllegalStateException("Render element needs condition."));
+                .orElseThrow(() -> new IllegalStateException("Render element needs 'condition' attribute."));
         this.renders = RenderCreator.create(element.children(), subViews);
     }
 
