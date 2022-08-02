@@ -72,6 +72,7 @@ public class PlateTest {
         final Model model = new Model();
         model.add("title", "Website Title");
         model.add("peoples", List.of(new Person("Achim"), new Person("Joachim")));
+        model.add("status", 200);
         test("src/test/resources/Test03/", model);
     }
 

@@ -3,7 +3,7 @@ const plate = function() {
         document
         .querySelectorAll(selector)
         .forEach(e => {
-            const uuid=e.previousSibling?.textContent;
+            const uuid=e.previousSibling?.textContent ?? 'main';
             setupFunc({element:e,props:plateModel[uuid]});
         });
     }

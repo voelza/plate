@@ -16,8 +16,11 @@ public class Model {
         this.values.put(name, value);
     }
 
+    public Object get(final String name) {
+        return values.get(name);
+    }
+
     public void forEach(BiConsumer<String, Object> forEachFunction) {
         values.forEach(forEachFunction);
     }
-
 }

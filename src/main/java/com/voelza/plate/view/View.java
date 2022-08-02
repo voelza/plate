@@ -1,5 +1,7 @@
 package com.voelza.plate.view;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voelza.plate.Model;
 import com.voelza.plate.component.Component;
 import com.voelza.plate.component.ComponentResolver;
@@ -25,6 +27,7 @@ public class View {
 
     private static final String SCOPE_PREFIX = "data-p-";
     private static final String SETUP_PREFIX = "data-p-setup-";
+    private static final ObjectMapper JSON_PARSER = new ObjectMapper();
 
     private final ViewOrigin viewOrigin;
     private final String name;
@@ -123,7 +126,7 @@ public class View {
                         "document" +
                         ".querySelectorAll(selector)" +
                         ".forEach(e => {" +
-                        "const uuid=e.previousSibling?.textContent;" +
+                        "const uuid=e.previousSibling?.textContent ?? 'main';" +
                         "setupFunc({element:e,props:plateModel[uuid]});" +
                         "});" +
                         "}" +
@@ -153,18 +156,26 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
-        return addPropScriptIfNeeded(renderResult);
+        return addPropScriptIfNeeded(renderResult, model);
     }
 
-    private String addPropScriptIfNeeded(final ElementRenderResult renderResult) {
+    private String addPropScriptIfNeeded(final ElementRenderResult renderResult, final Model model) {
         String resultHTML = renderResult.html();
-        if (this.viewOrigin == ViewOrigin.ROOT && CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList())) {
+        if (this.viewOrigin == ViewOrigin.ROOT
+                && (CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList()) || CollectionUtils.isNotEmpty(this.props))) {
             final int bodyEndIndex = resultHTML.indexOf("</body>");
             if (bodyEndIndex == -1) {
                 return resultHTML;
             }
 
             final Map<String, List<ScriptPropFill>> scriptFillProps = new HashMap<>();
+            scriptFillProps.put(
+                    "main",
+                    this.props
+                            .stream()
+                            .filter(p -> p.inScript).map(p -> new ScriptPropFill("main", p.name, model.get(p.name)))
+                            .toList());
+
             for (final ScriptPropFill scriptPropFill : renderResult.scriptPropFillsList()) {
                 List<ScriptPropFill> fills = scriptFillProps.get(scriptPropFill.uuid());
                 if (fills == null) {
@@ -195,7 +206,15 @@ public class View {
     }
 
     private String createScriptProp(final ScriptPropFill scriptPropFill) {
-        return String.format("\"%s\":\"%s\"", scriptPropFill.name(), scriptPropFill.value());
+        return String.format("\"%s\":%s", scriptPropFill.name(), getJavaScriptValue(scriptPropFill.value()));
+    }
+
+    private String getJavaScriptValue(final Object value) {
+        try {
+            return JSON_PARSER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getCSS() {
