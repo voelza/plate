@@ -5,10 +5,14 @@ import com.voelza.plate.html.HTMLParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 public class ComponentResolver {
+
+    private static final Map<String, Component> COMPONENT_MAP = new HashMap<>();
 
     private ComponentResolver() {
         // hide
@@ -16,9 +20,14 @@ public class ComponentResolver {
 
     public static Optional<Component> resolve(final String path, final Locale locale) {
         try {
-            final String html = loadResultFile(path);
-            final Component component = new Component(path, HTMLParser.parse(html));
-            // TODO caching etc.
+            final String key = path + locale.toString();
+            Component component = COMPONENT_MAP.get(key);
+            if (component == null) {
+                final String html = loadResultFile(path);
+                // TODO i18n
+                component = new Component(path, HTMLParser.parse(html));
+                COMPONENT_MAP.put(key, component);
+            }
             return Optional.of(component);
         } catch (final Exception e) {
             e.printStackTrace();
