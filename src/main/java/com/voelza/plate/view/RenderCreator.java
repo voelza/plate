@@ -1,7 +1,6 @@
 package com.voelza.plate.view;
 
 import com.voelza.plate.Syntax;
-import com.voelza.plate.Version;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 import com.voelza.plate.html.TextElement;
@@ -10,7 +9,6 @@ import com.voelza.plate.utils.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -18,7 +16,7 @@ import java.util.regex.Pattern;
 class RenderCreator {
 
     private static final Set<String> NONE_ADDITIONAL_ATTRS_ELEMENTS =
-            Set.of("!doctype", "html", "head", "title", "script", "style", "link", "media", "meta", "base", "noscript");
+            Set.of("!doctype", "html", "title", "script", "style", "link", "media", "meta", "base", "noscript");
 
     private static final Set<String> NONE_SETUP_ATTRS = Set.of("!doctype", "noscript");
 
@@ -36,6 +34,11 @@ class RenderCreator {
 
             if ("forEach".equalsIgnoreCase(element.name())) {
                 renders.add(new ForEachRender(element, options));
+                continue;
+            }
+
+            if ("head".equalsIgnoreCase(element.name())) {
+                renders.add(new HeadElementRender(element, options));
                 continue;
             }
 
@@ -115,10 +118,6 @@ class RenderCreator {
         String closingTag = null;
         if (!isStandAloneTag) {
             childRenders = create(options.newElements(element.children()).clearSetupAttribute());
-            if ("head".equalsIgnoreCase(element.name())) {
-                createCSSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
-                createJSLink(options).map(StaticElementRender::new).ifPresent(childRenders::add);
-            }
             closingTag = createClosingTag(element);
         }
         return new TemplatedElementRender(isStandAloneTag, startingTag, childRenders, closingTag);
@@ -139,28 +138,10 @@ class RenderCreator {
             for (final Element child : element.children()) {
                 html.append(createStaticHTML(child, options.clearSetupAttribute()));
             }
-            if ("head".equalsIgnoreCase(element.name())) {
-                createCSSLink(options).ifPresent(html::append);
-                createJSLink(options).ifPresent(html::append);
-            }
             html.append(createClosingTag(element));
         }
 
         return html.toString();
-    }
-
-    private static Optional<String> createJSLink(final RenderCreatorOptions options) {
-        if (!options.hasJavaScript()) {
-            return Optional.empty();
-        }
-        return Optional.of(String.format("<script src=\"/plate/js/%s-%s.js\" defer></script>", options.viewName(), Version.get()));
-    }
-
-    private static Optional<String> createCSSLink(final RenderCreatorOptions options) {
-        if (!options.hasCSS()) {
-            return Optional.empty();
-        }
-        return Optional.of(String.format("<link href=\"/plate/css/%s-%s.css\">", options.viewName(), Version.get()));
     }
 
     private static String createStaticStartingTag(final Element element,
