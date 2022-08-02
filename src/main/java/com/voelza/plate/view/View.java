@@ -153,6 +153,10 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
+        return addPropScriptIfNeeded(renderResult);
+    }
+
+    private String addPropScriptIfNeeded(final ElementRenderResult renderResult) {
         String resultHTML = renderResult.html();
         if (this.viewOrigin == ViewOrigin.ROOT && CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList())) {
             final int bodyEndIndex = resultHTML.indexOf("</body>");
