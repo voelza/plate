@@ -41,9 +41,9 @@ public class ExpressionResolver {
         return new ExpressionResolver(model);
     }
 
-    public String evaluate(final String expression) {
+    public Object evaluate(final String expression) {
         final JexlExpression e = jexl.createExpression(expression);
-        return String.valueOf(e.evaluate(jexlContext));
+        return e.evaluate(jexlContext);
     }
 
     public boolean evaluateCondition(final String condition) {

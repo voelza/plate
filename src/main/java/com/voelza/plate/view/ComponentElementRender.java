@@ -4,9 +4,11 @@ import com.voelza.plate.Model;
 import com.voelza.plate.component.Slot;
 import com.voelza.plate.html.Element;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 class ComponentElementRender implements ElementRender {
 
@@ -20,7 +22,7 @@ class ComponentElementRender implements ElementRender {
             final RenderCreatorOptions options
     ) {
         this.view = view;
-        propFills = view.props.stream().map(p -> new PropFill(p.name, element)).toList();
+        propFills = view.props.stream().map(p -> new PropFill(p.name, p.inScript, element)).toList();
         slotFills = createSlotFills(element, view, options);
     }
 
@@ -37,11 +39,22 @@ class ComponentElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
+        final String uuid = UUID.randomUUID().toString();
         final Model model = new Model();
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
         for (final PropFill propFill : propFills) {
-            model.add(propFill.name, renderContext.expressionResolver().evaluate(propFill.propExpression));
+            final Object propValue = renderContext.expressionResolver().evaluate(propFill.propExpression);
+            model.add(propFill.name, propValue);
+            if (propFill.isScriptProp) {
+                scriptPropFills.add(new ScriptPropFill(uuid, propFill.name, propValue));
+            }
         }
-        return view.render(model, this.slotFills, renderContext.expressionResolver());
+
+        final String html = (scriptPropFills.size() > 0
+                ? String.format("<!--%s-->", uuid)
+                : "")
+                + view.render(model, this.slotFills, renderContext.expressionResolver());
+        return new ElementRenderResult(html, scriptPropFills);
     }
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-p-setup-test>
+<head>
+    <meta charset="UTF-8">
+    <title>Website Title</title>
+    <link href="/plate/css/test-DEV.css">
+    <script src="/plate/js/test-DEV.js" defer></script>
+</head>
+<body>
+<!--00000000-0000-0001-0000-000000000001-->
+<nav data-p-header data-p-setup-header>
+    Hello! World!
+</nav>
+<main>
+    <!--00000000-0000-0001-0000-000000000002-->
+    <h1 data-p-setup-post data-p-post>Post!</h1>
+    <div data-p-setup-post data-p-post class="post-content">
+        Achim
+    </div>
+    <!--00000000-0000-0001-0000-000000000003-->
+    <h1 data-p-setup-post data-p-post>Post!</h1>
+    <div data-p-setup-post data-p-post class="post-content">
+        Joachim
+    </div>
+</main>
+<script data-p-props>
+const plateModel={
+    "00000000-0000-0001-0000-000000000003":{
+        "content":"Joachim"
+    },
+    "00000000-0000-0001-0000-000000000001":{
+        "title":"Hello!",
+        "justForJS":"Hello JS!"
+    },
+    "00000000-0000-0001-0000-000000000002":{
+        "content":"Achim"
+    }
+};
+document.querySelector('script[data-p-props]').remove();
+
+</script>
+</body>
+</html>

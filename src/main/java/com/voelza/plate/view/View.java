@@ -9,9 +9,11 @@ import com.voelza.plate.component.Slot;
 import com.voelza.plate.css.CSSParser;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
+import com.voelza.plate.utils.CollectionUtils;
 import com.voelza.plate.utils.StringUtils;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ public class View {
     private static final String SCOPE_PREFIX = "data-p-";
     private static final String SETUP_PREFIX = "data-p-setup-";
 
+    private final ViewOrigin viewOrigin;
     private final String name;
     private final String directoryPath;
     private final Locale locale;
@@ -44,6 +47,8 @@ public class View {
     }
 
     public View(final String path, final Locale locale, final ViewOrigin viewOrigin) {
+        this.viewOrigin = viewOrigin;
+
         final Path filePath = Path.of(path);
         final String fileName = filePath.getFileName().toString();
         final int extensionIndex = fileName.lastIndexOf(".");
@@ -140,12 +145,52 @@ public class View {
 
     String render(final Model model, Map<String, SlotFill> slotFills, final ExpressionResolver parentExpressionResolver) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);
-        return Renderer.render(renders,
+        final ElementRenderResult renderResult = Renderer.render(
+                renders,
                 new RenderContext(
                         expressionResolver,
                         slotFills,
                         parentExpressionResolver
                 ));
+        String resultHTML = renderResult.html();
+        if (this.viewOrigin == ViewOrigin.ROOT && CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList())) {
+            final int bodyEndIndex = resultHTML.indexOf("</body>");
+            if (bodyEndIndex == -1) {
+                return resultHTML;
+            }
+
+            final Map<String, List<ScriptPropFill>> scriptFillProps = new HashMap<>();
+            for (final ScriptPropFill scriptPropFill : renderResult.scriptPropFillsList()) {
+                List<ScriptPropFill> fills = scriptFillProps.get(scriptPropFill.uuid());
+                if (fills == null) {
+                    fills = new ArrayList<>();
+                }
+                fills.add(scriptPropFill);
+                scriptFillProps.put(scriptPropFill.uuid(), fills);
+            }
+
+            final String propScript = String.format(
+                    "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
+                    String.join(
+                            ",",
+                            scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()
+                    )
+            );
+            resultHTML = resultHTML.substring(0, bodyEndIndex) + propScript + resultHTML.substring(bodyEndIndex);
+        }
+        return resultHTML;
+    }
+
+    private String createScriptPropDeclaration(final Map.Entry<String, List<ScriptPropFill>> scriptPropsFills) {
+        return String.format(
+                "\"%s\":{%s}",
+                scriptPropsFills.getKey(),
+                String.join(",", scriptPropsFills.getValue().stream().map(this::createScriptProp).toList())
+        );
+    }
+
+    private String createScriptProp(final ScriptPropFill scriptPropFill) {
+        return String.format("\"%s\":\"%s\"", scriptPropFill.name(), scriptPropFill.value());
     }
 
     public String getCSS() {

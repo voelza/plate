@@ -1,5 +1,6 @@
 package com.voelza.plate.view;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class Renderer {
@@ -8,15 +9,20 @@ class Renderer {
         // hide
     }
 
-    static String render(final List<ElementRender> renders, final RenderContext renderContext) {
+    static ElementRenderResult render(final List<ElementRender> renders, final RenderContext renderContext) {
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
         final StringBuilder html = new StringBuilder();
         for (final ElementRender render : renders) {
-            html.append(render(render, renderContext));
+            final ElementRenderResult result = render(render, renderContext);
+            html.append(result.html());
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills.addAll(result.scriptPropFillsList());
+            }
         }
-        return html.toString();
+        return new ElementRenderResult(html.toString(), scriptPropFills);
     }
 
-    private static String render(final ElementRender render, final RenderContext renderContext) {
+    private static ElementRenderResult render(final ElementRender render, final RenderContext renderContext) {
         if (render instanceof SlotElementRender slotRender) {
             final SlotFill slotFill = renderContext.slotFills().get(slotRender.name);
             if (slotFill == null) {

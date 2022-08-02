@@ -21,10 +21,10 @@ class ConditionalRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
         if (renderContext.expressionResolver().evaluateCondition(this.condition)) {
             return Renderer.render(renders, renderContext);
         }
-        return "";
+        return new ElementRenderResult("");
     }
 }

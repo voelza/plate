@@ -31,7 +31,8 @@ class HeadElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
-        return "<head>" + Renderer.render(childRenders, renderContext) + "</head>";
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
+        final ElementRenderResult renderResult = Renderer.render(childRenders, renderContext);
+        return new ElementRenderResult("<head>" + renderResult.html() + "</head>", renderResult.scriptPropFillsList());
     }
 }

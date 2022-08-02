@@ -1,0 +1,12 @@
+nav[data-p-header]{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-content[data-p-post]{
+     font-size: 0.8rem;
+}

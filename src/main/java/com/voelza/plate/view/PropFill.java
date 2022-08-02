@@ -8,9 +8,11 @@ class PropFill {
 
     final String name;
     final String propExpression;
+    final boolean isScriptProp;
 
-    PropFill(final String propName, final Element element) {
+    PropFill(final String propName, final boolean isScriptProp, final Element element) {
         name = propName;
+        this.isScriptProp = isScriptProp;
         this.propExpression = element
                 .getAttribute(Syntax.TEMPLATED.token + propName)
                 .map(Attribute::value)

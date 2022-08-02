@@ -4,6 +4,7 @@ import com.voelza.plate.Model;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,11 +29,11 @@ class ForEachRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
         final Collection<?> collection = renderContext.expressionResolver().evaluateCollection(this.collectionExpression);
 
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
         final StringBuilder html = new StringBuilder();
-
         final Iterator<?> iterator = collection.iterator();
         int index = 0;
         while (iterator.hasNext()) {
@@ -41,10 +42,17 @@ class ForEachRender implements ElementRender {
             loopModel.add(elementName, iterator.next());
             loopModel.add("_index", index);
             final ExpressionResolver expressionResolver = renderContext.expressionResolver().withAdditionalModel(loopModel);
-            html.append(Renderer.render(renders, new RenderContext(expressionResolver, Collections.emptyMap(), null)));
+
+            final ElementRenderResult result =
+                    Renderer.render(renders, new RenderContext(expressionResolver, Collections.emptyMap(), null));
+            html.append(result.html());
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills.addAll(result.scriptPropFillsList());
+            }
+
             index++;
         }
 
-        return html.toString();
+        return new ElementRenderResult(html.toString(), scriptPropFills);
     }
 }

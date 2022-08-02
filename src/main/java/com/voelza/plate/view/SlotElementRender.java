@@ -12,7 +12,7 @@ public class SlotElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
         throw new IllegalStateException("Oops. This should not have happened");
     }
 }

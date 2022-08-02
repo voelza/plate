@@ -21,14 +21,21 @@ class TemplatedElementRender implements ElementRender {
     }
 
     @Override
-    public String renderHTML(final RenderContext renderContext) {
+    public ElementRenderResult renderHTML(final RenderContext renderContext) {
         final ExpressionResolver expressionResolver = renderContext.expressionResolver();
+
+        List<ScriptPropFill> scriptPropFills = null;
         final StringBuilder html = new StringBuilder();
         html.append(startingTag.apply(expressionResolver));
         if (!isStandAloneTag) {
-            html.append(Renderer.render(childRenders, renderContext));
+            final ElementRenderResult result = Renderer.render(childRenders, renderContext);
+            html.append(result.html());
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills = result.scriptPropFillsList();
+            }
+
             html.append(closingTag);
         }
-        return html.toString();
+        return new ElementRenderResult(html.toString(), scriptPropFills);
     }
 }

@@ -23,7 +23,7 @@ class RenderCreator {
     private RenderCreator() {
         // hide
     }
-
+    
     static List<ElementRender> create(final RenderCreatorOptions options) {
         final List<ElementRender> renders = new ArrayList<>();
         for (final Element element : options.elements()) {
@@ -80,7 +80,7 @@ class RenderCreator {
                 final Pattern p = Pattern.compile(Syntax.TEXT_TEMPLATE_REGEX.token);
                 return p.matcher(text).replaceAll(r -> {
                     final String expression = r.group(1);
-                    return expressionResolver.evaluate(expression);
+                    return String.valueOf(expressionResolver.evaluate(expression));
                 });
             });
         }
@@ -96,7 +96,7 @@ class RenderCreator {
                             if (a.isTemplated()) {
                                 return new TemplatedAttribute((expressionResolver) -> {
                                     final String name = a.name().substring(Syntax.TEMPLATED.token.length());
-                                    final String value = expressionResolver.evaluate(a.value());
+                                    final String value = String.valueOf(expressionResolver.evaluate(a.value()));
                                     return createAttribute(name, value);
                                 });
                             }
