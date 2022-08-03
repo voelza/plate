@@ -7,15 +7,15 @@ const plate = function() {
             setupFunc({element:e,props:plateModel[uuid]});
         });
     }
-    setup('[data-p-setup-test]',({element}) => {
+    setup('[data-p-setup-test]',({element,props}) => {
       console.log("hello");
     });
-    setup('[data-p-setup-header]',({element}) => {
+    setup('[data-p-setup-header]',({element,props}) => {
           function buh() {
               alert("Buhh");
           }
     });
-    setup('[data-p-setup-post]',({element}) => {
+    setup('[data-p-setup-post]',({element,props}) => {
           function alertPostContent() {
               alert("Post Content!");
           }

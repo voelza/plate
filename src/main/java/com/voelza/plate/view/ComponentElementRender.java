@@ -51,10 +51,8 @@ class ComponentElementRender implements ElementRender {
             }
         }
 
-        final String html = (scriptPropFills.size() > 0
-                ? String.format("<!--%s-->", uuid)
-                : "")
-                + view.render(model, this.slotFills, renderContext.expressionResolver());
+        final String html =
+                view.render(scriptPropFills.size() > 0 ? uuid : null, model, this.slotFills, renderContext.expressionResolver());
         return new ElementRenderResult(html, scriptPropFills);
     }
 }

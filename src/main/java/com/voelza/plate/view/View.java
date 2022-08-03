@@ -141,23 +141,38 @@ public class View {
             return "";
         }
 
-        return String.format("setup('[data-p-setup-%s]',({element}) => {%s});", name, declaredJavaScript);
+        return String.format("setup('[data-p-setup-%s]',({element,props}) => {%s});", name, declaredJavaScript);
     }
 
     public String render(final Model model) {
-        return render(model, Collections.emptyMap(), null);
+        return render(null, model, Collections.emptyMap(), null);
     }
 
-    String render(final Model model, Map<String, SlotFill> slotFills, final ExpressionResolver parentExpressionResolver) {
+    String render(
+            final String uuid,
+            final Model model,
+            final Map<String, SlotFill> slotFills,
+            final ExpressionResolver parentExpressionResolver
+    ) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);
         final ElementRenderResult renderResult = Renderer.render(
-                renders,
+                uuid != null ? addUUIDRenders(uuid, renders) : renders,
                 new RenderContext(
                         expressionResolver,
                         slotFills,
                         parentExpressionResolver
                 ));
         return addPropScriptIfNeeded(renderResult, model);
+    }
+
+    private List<ElementRender> addUUIDRenders(final String uuid, final List<ElementRender> renders) {
+        final UUIDElementRender uuidElementRender = new UUIDElementRender(uuid);
+        final List<ElementRender> newRenders = new ArrayList<>();
+        for (final ElementRender render : renders) {
+            newRenders.add(uuidElementRender);
+            newRenders.add(render);
+        }
+        return Collections.unmodifiableList(newRenders);
     }
 
     private String addPropScriptIfNeeded(final ElementRenderResult renderResult, final Model model) {

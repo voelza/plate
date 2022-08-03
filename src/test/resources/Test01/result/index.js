@@ -8,7 +8,7 @@ const plate = function() {
         });
     }
 
-    setup('[data-p-setup-post]',({element}) => {
+    setup('[data-p-setup-post]',({element,props}) => {
       function alertPostContent() {
         alert("Post Content!");
       }
