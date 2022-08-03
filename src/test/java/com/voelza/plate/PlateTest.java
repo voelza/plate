@@ -76,6 +76,6 @@ public class PlateTest {
         test("src/test/resources/Test03/", model);
     }
 
-    public static record Person(String name) {
+    public record Person(String name) {
     }
 }

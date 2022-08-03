@@ -1,10 +1,8 @@
 package com.voelza.plate.component;
 
+import com.voelza.plate.FileLoader;
 import com.voelza.plate.html.HTMLParser;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +21,7 @@ public class ComponentResolver {
             final String key = path + locale.toString();
             Component component = COMPONENT_MAP.get(key);
             if (component == null) {
-                final String html = loadResultFile(path);
+                final String html = FileLoader.loadViewFile(path);
                 // TODO i18n
                 component = new Component(path, HTMLParser.parse(html));
                 COMPONENT_MAP.put(key, component);
@@ -33,10 +31,5 @@ public class ComponentResolver {
             e.printStackTrace();
             return Optional.empty();
         }
-    }
-
-    private static String loadResultFile(final String path) throws IOException {
-        // TODO this will not work inside jar
-        return Files.readString(Paths.get(path)).replaceAll("\\r|\\n|\\t|\\s ", "");
     }
 }

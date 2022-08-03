@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class View {
@@ -56,7 +57,7 @@ public class View {
         final String fileName = filePath.getFileName().toString();
         final int extensionIndex = fileName.lastIndexOf(".");
         this.name = fileName.substring(0, extensionIndex != -1 ? extensionIndex : fileName.length()).toLowerCase();
-        this.directoryPath = filePath.getParent().toString();
+        this.directoryPath = Optional.ofNullable(filePath.getParent()).map(Path::toString).orElse("");
         this.locale = locale;
 
         final Component component = getComponent(path, locale);

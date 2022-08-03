@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class Plate {
 
-    private static String templatesPath;
+    private static String templatesPath = "";
     private static final Map<String, View> VIEWS = new HashMap<>();
 
     private Plate() {
@@ -20,20 +21,30 @@ public class Plate {
         Plate.templatesPath = templatesPath;
     }
 
-    public static String render(final String view, final Locale locale, final Model model) {
+    public static void setCustomFileLoader(final Function<String, String> pathToFileContent) {
+        FileLoader.setLoadViewFile(pathToFileContent);
+    }
+
+    public static View createView(final String view, final Locale locale) {
         View v = VIEWS.get(view);
         if (v == null) {
-            v = new View(templatesPath + "/" + view, locale);
-            VIEWS.put(view + locale, v);
+            v = new View(templatesPath + view, locale);
+            VIEWS.put(view.toLowerCase() + locale, v);
         }
-        return v.render(model);
+        return v;
     }
 
-    public static Optional<String> getJavaScript(final String view) {
-        return Optional.ofNullable(VIEWS.get(view)).map(View::getJavaScript);
+    public static Optional<String> getJavaScript(final String view, final Locale locale) {
+        return Optional.ofNullable(VIEWS.get(getKey(view, "js", locale))).map(View::getJavaScript);
     }
 
-    public static Optional<String> getCSS(final String view) {
-        return Optional.ofNullable(VIEWS.get(view)).map(View::getCSS);
+    public static Optional<String> getCSS(final String view, final Locale locale) {
+        return Optional.ofNullable(VIEWS.get(getKey(view, "css", locale))).map(View::getCSS);
+    }
+
+    private static String getKey(final String fileName, final String extension, final Locale locale) {
+        final String fileEnd = "-" + Version.get() + "." + extension;
+        final String viewName = fileName.substring(0, fileName.length() - fileEnd.length());
+        return viewName + ".html" + locale;
     }
 }
