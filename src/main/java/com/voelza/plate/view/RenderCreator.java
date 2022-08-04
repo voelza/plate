@@ -42,7 +42,7 @@ class RenderCreator {
                 continue;
             }
 
-            if ("head".equalsIgnoreCase(element.name())) {
+            if (Syntax.HEAD.token.equalsIgnoreCase(element.name())) {
                 renders.add(new HeadElementRender(element, options));
                 continue;
             }

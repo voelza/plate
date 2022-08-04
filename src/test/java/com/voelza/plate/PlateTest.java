@@ -23,6 +23,9 @@ public class PlateTest {
         return Files.readString(Paths.get(testDir)).replaceAll("\\r|\\n|\\t|\\s ", "");
     }
 
+    public record Person(String name) {
+    }
+
     private void test(final String testDir, final Model model) throws IOException {
         final AtomicInteger leastSigBit = new AtomicInteger(0);
         try (MockedStatic<UUID> mocked = mockStatic(UUID.class)) {
@@ -105,6 +108,9 @@ public class PlateTest {
         test("src/test/resources/I18nTest/", model);
     }
 
-    public record Person(String name) {
+    @Test
+    public void justCSS() throws IOException {
+        final Model model = new Model();
+        test("src/test/resources/JustCSS/", model);
     }
 }

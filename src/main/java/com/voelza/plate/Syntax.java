@@ -6,7 +6,8 @@ public enum Syntax {
     RENDER("render"),
     FOREACH("foreach"),
     UNSAFE("unsafe"),
-    SLOT("slot");
+    SLOT("slot"),
+    HEAD("head");
 
     public final String token;
 

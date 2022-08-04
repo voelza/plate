@@ -38,6 +38,7 @@ public interface Element {
                                 || c.name().equalsIgnoreCase(Syntax.UNSAFE.token)
                                 || c.name().equalsIgnoreCase(Syntax.FOREACH.token)
                                 || c.name().equalsIgnoreCase(Syntax.RENDER.token)
+                                || c.name().equalsIgnoreCase(Syntax.HEAD.token)
                                 || subViews.get(c.name()) != null
                                 || c.isAnyChildTemplatedOrSubViewOrSpecialTag(subViews)
                 );
