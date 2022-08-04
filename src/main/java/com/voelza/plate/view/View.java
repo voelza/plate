@@ -97,7 +97,11 @@ public class View {
     private Map<String, View> resolveImports(final List<Import> imports) {
         final Map<String, View> subView = new HashMap<>();
         for (final Import i : imports) {
-            subView.put(i.name.toLowerCase(), new View(directoryPath + "/" + i.file, locale, ViewOrigin.COMPONENT));
+            subView.put(i.name.toLowerCase(), new View(
+                    Optional.of(directoryPath).filter(StringUtils::hasText).map(d -> d + "/").orElse("") + i.file,
+                    locale,
+                    ViewOrigin.COMPONENT
+            ));
         }
         return subView;
     }
