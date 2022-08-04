@@ -5,9 +5,14 @@ public class Version {
         // hide
     }
 
+    private static String version = "DEV";
+
+    static void setVersion(final String version) {
+        Version.version = version;
+    }
+
     public static String get() {
-        final String version = Version.class.getPackage().getImplementationVersion();
-        return version != null ? version : "DEV";
+        return version;
     }
 
 }

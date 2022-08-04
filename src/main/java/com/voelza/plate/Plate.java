@@ -18,6 +18,10 @@ public class Plate {
         // hide
     }
 
+    public static void setVersion(final String version) {
+        Version.setVersion(version);
+    }
+
     public static void setTemplatesPath(final String templatesPath) {
         Plate.templatesPath = templatesPath;
     }
