@@ -1,5 +1,6 @@
 package com.voelza.plate.html;
 
+import com.voelza.plate.Syntax;
 import com.voelza.plate.view.View;
 
 import java.util.ArrayList;
@@ -29,13 +30,16 @@ public interface Element {
         return attributes().stream().anyMatch(Attribute::isTemplated);
     }
 
-    default boolean isAnyChildTemplatedOrSubViewOrSlot(final Map<String, View> subViews) {
+    default boolean isAnyChildTemplatedOrSubViewOrSpecialTag(final Map<String, View> subViews) {
         return children().stream()
                 .anyMatch(
                         c -> c.attributesAreTemplated()
-                                || c.name().equalsIgnoreCase("slot")
+                                || c.name().equalsIgnoreCase(Syntax.SLOT.token)
+                                || c.name().equalsIgnoreCase(Syntax.UNSAFE.token)
+                                || c.name().equalsIgnoreCase(Syntax.FOREACH.token)
+                                || c.name().equalsIgnoreCase(Syntax.RENDER.token)
                                 || subViews.get(c.name()) != null
-                                || c.isAnyChildTemplatedOrSubViewOrSlot(subViews)
+                                || c.isAnyChildTemplatedOrSubViewOrSpecialTag(subViews)
                 );
     }
 

@@ -76,6 +76,20 @@ public class PlateTest {
         test("src/test/resources/Test03/", model);
     }
 
+    @Test
+    public void htmlUnsafeTest() throws IOException {
+        final Model model = new Model();
+        model.add("html", "<h1>This is unsafe HTML from the Model</h1><div><script>alert(\"HACKED\");</script></div>");
+        test("src/test/resources/HTMLTest/", model);
+    }
+
+    @Test
+    public void htmlSafeTest() throws IOException {
+        final Model model = new Model();
+        model.add("html", "<h1>This is unsafe HTML from the Model</h1><div><script>alert(\"HACKED\");</script></div>");
+        test("src/test/resources/SafeHTMLTest/", model);
+    }
+
     public record Person(String name) {
     }
 }

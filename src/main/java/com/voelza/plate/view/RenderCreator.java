@@ -23,17 +23,22 @@ class RenderCreator {
     private RenderCreator() {
         // hide
     }
-    
+
     static List<ElementRender> create(final RenderCreatorOptions options) {
         final List<ElementRender> renders = new ArrayList<>();
         for (final Element element : options.elements()) {
-            if ("render".equalsIgnoreCase(element.name())) {
+            if (Syntax.RENDER.token.equalsIgnoreCase(element.name())) {
                 renders.add(new ConditionalRender(element, options));
                 continue;
             }
 
-            if ("forEach".equalsIgnoreCase(element.name())) {
+            if (Syntax.FOREACH.token.equalsIgnoreCase(element.name())) {
                 renders.add(new ForEachRender(element, options));
+                continue;
+            }
+
+            if (Syntax.UNSAFE.token.equalsIgnoreCase(element.name())) {
+                renders.add(new UnsafeHTMLRender(element, options));
                 continue;
             }
 
@@ -48,12 +53,12 @@ class RenderCreator {
                 continue;
             }
 
-            if (element.name().equalsIgnoreCase("slot")) {
+            if (element.name().equalsIgnoreCase(Syntax.SLOT.token)) {
                 renders.add(new SlotElementRender(element));
                 continue;
             }
 
-            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubViewOrSlot(options.subViews())) {
+            if (!element.attributesAreTemplated() && !element.isAnyChildTemplatedOrSubViewOrSpecialTag(options.subViews())) {
                 renders.add(createStaticRender(element, options));
                 continue;
             }
@@ -74,13 +79,14 @@ class RenderCreator {
             final RenderCreatorOptions options
     ) {
         if (element instanceof TextElement textElement) {
-            // TODO allow HTML
-            final String text = textElement.text().replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+            final String text = textElement.text();
             return new TemplatedTextElementRender((expressionResolver) -> {
                 final Pattern p = Pattern.compile(Syntax.TEXT_TEMPLATE_REGEX.token);
                 return p.matcher(text).replaceAll(r -> {
                     final String expression = r.group(1);
-                    return String.valueOf(expressionResolver.evaluate(expression));
+                    return String.valueOf(expressionResolver.evaluate(expression))
+                            .replaceAll("<", "&lt;")
+                            .replaceAll(">", "&gt;");
                 });
             });
         }

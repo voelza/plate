@@ -1,5 +1,6 @@
 package com.voelza.plate.component;
 
+import com.voelza.plate.Syntax;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.DOM;
 import com.voelza.plate.html.Element;
@@ -65,7 +66,7 @@ public class Component {
                 .map(t ->
                         t.children()
                                 .stream()
-                                .map(e -> e.findElementsByName("slot"))
+                                .map(e -> e.findElementsByName(Syntax.SLOT.token))
                                 .flatMap(List::stream)
                                 .map(Component::createSlot)
                                 .toList())
