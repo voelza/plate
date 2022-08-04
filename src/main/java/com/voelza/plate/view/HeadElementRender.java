@@ -27,7 +27,7 @@ class HeadElementRender implements ElementRender {
         if (!options.hasCSS()) {
             return Optional.empty();
         }
-        return Optional.of(String.format("<link href=\"/plate/css/%s-%s.css\">", options.viewName(), Version.get()));
+        return Optional.of(String.format("<link rel=\"stylesheet\" href=\"/plate/css/%s-%s.css\">", options.viewName(), Version.get()));
     }
 
     @Override
