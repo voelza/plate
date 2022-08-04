@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,6 +89,20 @@ public class PlateTest {
         final Model model = new Model();
         model.add("html", "<h1>This is unsafe HTML from the Model</h1><div><script>alert(\"HACKED\");</script></div>");
         test("src/test/resources/SafeHTMLTest/", model);
+    }
+
+    @Test
+    public void i18nTest() throws IOException {
+        I18nService.addTranslation(
+                Locale.ENGLISH,
+                Map.of(
+                        "test.main.text", "Welcome to our i18n test!",
+                        "test.css.color", "green",
+                        "test.js.log", "hello from js"
+                )
+        );
+        final Model model = new Model();
+        test("src/test/resources/I18nTest/", model);
     }
 
     public record Person(String name) {

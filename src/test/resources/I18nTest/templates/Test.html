@@ -1,0 +1,27 @@
+<template>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>i18n Test</title>
+    </head>
+    <body>
+    <main>
+        <h1>##{test.main.doesntexist}</h1>
+        ##{test.main.text}
+    </main>
+    </body>
+    </html>
+</template>
+
+<style>
+    main {
+        background-color: ##{test.css.color};
+    }
+
+</style>
+
+<script>
+    console.log("##{test.js.log}");
+
+</script>

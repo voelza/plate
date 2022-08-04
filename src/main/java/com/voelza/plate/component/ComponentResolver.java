@@ -1,6 +1,7 @@
 package com.voelza.plate.component;
 
 import com.voelza.plate.FileLoader;
+import com.voelza.plate.I18nService;
 import com.voelza.plate.html.HTMLParser;
 
 import java.util.HashMap;
@@ -21,8 +22,7 @@ public class ComponentResolver {
             final String key = path + locale.toString();
             Component component = COMPONENT_MAP.get(key);
             if (component == null) {
-                final String html = FileLoader.loadViewFile(path);
-                // TODO i18n
+                final String html = I18nService.translate(locale, FileLoader.loadViewFile(path));
                 component = new Component(path, HTMLParser.parse(html));
                 COMPONENT_MAP.put(key, component);
             }

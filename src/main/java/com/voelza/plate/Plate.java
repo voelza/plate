@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Plate {
 
@@ -23,6 +24,10 @@ public class Plate {
 
     public static void setCustomFileLoader(final Function<String, String> pathToFileContent) {
         FileLoader.setLoadViewFile(pathToFileContent);
+    }
+
+    public static void setTranslations(final Supplier<Map<Locale, Map<String, String>>> translationsProvider) {
+        translationsProvider.get().forEach(I18nService::addTranslation);
     }
 
     public static View createView(final String view, final Locale locale) {
