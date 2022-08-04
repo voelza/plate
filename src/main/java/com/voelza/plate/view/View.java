@@ -3,6 +3,7 @@ package com.voelza.plate.view;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voelza.plate.Model;
+import com.voelza.plate.ViewKeyCreator;
 import com.voelza.plate.component.Component;
 import com.voelza.plate.component.ComponentResolver;
 import com.voelza.plate.component.Import;
@@ -31,6 +32,7 @@ public class View {
     private static final ObjectMapper JSON_PARSER = new ObjectMapper();
 
     private final ViewOrigin viewOrigin;
+    private final String viewKey;
     private final String name;
     private final String directoryPath;
     private final Locale locale;
@@ -53,6 +55,7 @@ public class View {
     public View(final String path, final Locale locale, final ViewOrigin viewOrigin) {
         this.viewOrigin = viewOrigin;
 
+        this.viewKey = ViewKeyCreator.create(path);
         final Path filePath = Path.of(path);
         final String fileName = filePath.getFileName().toString();
         final int extensionIndex = fileName.lastIndexOf(".");
@@ -78,7 +81,7 @@ public class View {
                 StringUtils.hasText(this.declaredJavaScript) ? new Attribute(SETUP_PREFIX + this.name, null) : null;
         renders = RenderCreator.create(
                 new RenderCreatorOptions(
-                        name,
+                        this.viewKey,
                         StringUtils.hasText(viewCSS),
                         StringUtils.hasText(viewJavaScript),
                         elements,

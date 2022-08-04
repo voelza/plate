@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public class Plate {
 
     private static String templatesPath = "";
-    private static final Map<String, View> VIEWS = new HashMap<>();
+    static final Map<String, View> VIEWS = new HashMap<>();
 
     private Plate() {
         // hide
@@ -38,22 +38,23 @@ public class Plate {
         View v = VIEWS.get(view);
         if (v == null) {
             v = new View(templatesPath + view, locale);
-            VIEWS.put(view.toLowerCase() + locale, v);
+
+            VIEWS.put(ViewKeyCreator.create(view) + locale, v);
         }
         return v;
     }
 
     public static Optional<String> getJavaScript(final String view, final Locale locale) {
-        return Optional.ofNullable(VIEWS.get(getKey(view, "js", locale))).map(View::getJavaScript);
+        return Optional.ofNullable(VIEWS.get(getKey(view, locale))).map(View::getJavaScript);
     }
 
     public static Optional<String> getCSS(final String view, final Locale locale) {
-        return Optional.ofNullable(VIEWS.get(getKey(view, "css", locale))).map(View::getCSS);
+        final String key = getKey(view, locale);
+        return Optional.ofNullable(VIEWS.get(key)).map(View::getCSS);
     }
 
-    private static String getKey(final String fileName, final String extension, final Locale locale) {
-        final String fileEnd = "-" + Version.get() + "." + extension;
-        final String viewName = fileName.substring(0, fileName.length() - fileEnd.length());
-        return viewName + ".html" + locale;
+    private static String getKey(final String fileName, final Locale locale) {
+        final String viewName = fileName.substring(0, fileName.indexOf("-"));
+        return viewName + locale;
     }
 }

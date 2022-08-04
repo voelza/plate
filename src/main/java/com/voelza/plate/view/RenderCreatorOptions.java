@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public record RenderCreatorOptions(
-        String viewName,
+        String viewKey,
         boolean hasCSS,
         boolean hasJavaScript,
         List<Element> elements,
@@ -16,10 +16,10 @@ public record RenderCreatorOptions(
         Attribute setupAttribute) {
 
     RenderCreatorOptions newElements(final List<Element> elements) {
-        return new RenderCreatorOptions(viewName, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, setupAttribute);
+        return new RenderCreatorOptions(viewKey, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, setupAttribute);
     }
-    
+
     RenderCreatorOptions clearSetupAttribute() {
-        return new RenderCreatorOptions(viewName, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, null);
+        return new RenderCreatorOptions(viewKey, hasCSS, hasJavaScript, elements, subViews, scopeAttribute, null);
     }
 }
