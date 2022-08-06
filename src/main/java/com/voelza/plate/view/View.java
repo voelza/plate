@@ -3,6 +3,7 @@ package com.voelza.plate.view;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voelza.plate.Model;
+import com.voelza.plate.Plate;
 import com.voelza.plate.ViewKeyCreator;
 import com.voelza.plate.component.Component;
 import com.voelza.plate.component.ComponentResolver;
@@ -101,12 +102,28 @@ public class View {
         final Map<String, View> subView = new HashMap<>();
         for (final Import i : imports) {
             subView.put(i.name.toLowerCase(), new View(
-                    Optional.of(directoryPath).filter(StringUtils::hasText).map(d -> d + "/").orElse("") + i.file,
+                    getImportPath(i),
                     locale,
                     ViewOrigin.COMPONENT
             ));
         }
         return subView;
+    }
+
+    private String getImportPath(final Import i) {
+        final String importFilePath = i.file;
+        if (importFilePath.startsWith("@")) {
+            return Plate.getTemplatesPath() + importFilePath.substring(1);
+        }
+        return getDirectoryPath() + i.file;
+    }
+
+    private String getDirectoryPath() {
+        return Optional
+                .ofNullable(directoryPath)
+                .filter(StringUtils::hasText)
+                .map(d -> d + "/")
+                .orElse("");
     }
 
     private static String collectCSS(final String viewName, final String declaredCSS, final Map<String, View> subViews) {
@@ -122,6 +139,7 @@ public class View {
         final Map<String, String> jsMap = subViews
                 .entrySet()
                 .stream()
+                .filter(e -> StringUtils.hasText(e.getValue().getDeclaredJavaScript()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         (e) -> e.getValue().getDeclaredJavaScript()));
 

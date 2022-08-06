@@ -26,6 +26,10 @@ public class Plate {
         Plate.templatesPath = templatesPath;
     }
 
+    public static String getTemplatesPath() {
+        return templatesPath;
+    }
+
     public static void setCustomFileLoader(final Function<String, String> pathToFileContent) {
         FileLoader.setLoadViewFile(pathToFileContent);
     }

@@ -8,6 +8,7 @@ public class ViewKeyCreator {
     public static String create(String v) {
         return v
                 .toLowerCase()
+                .replaceAll("@", "")
                 .replaceAll("\\.html", "")
                 .replaceAll("[\\\\/.]", "_");
     }

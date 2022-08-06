@@ -271,18 +271,32 @@ Each setup function will be passed two parameters:
 - `props` is an object which holds all the properties of your component which you flagged to use `inScript`. To learn more follow this link [Properties in JavaScript](###properties-in-javascript)
 
 
-## Using Components
+# Using Components
 To use components within your view you will have to import them using the provided `import` element.
 
 This element must have the `file` attribute which has a relative path from your view to the component
 you want to use.
+
 So if your file structure is like this:
 ```
 MyView.html
 counter/Counter.html
 ```
-Your `import` `file` attribute must look like this `file="counter/Counter.html"`. Beware to not start
-the file name with a slash `/`.
+Your `import` `file` attribute must look like this `file="counter/Counter.html"`. 
+
+If you use the `@` letter on the start of your path the component file path will be
+resolved against the set path in `Plate::setTemplatesPath`. 
+
+So if your file structure looks like this:
+```
+templates/MyView.html
+templates/counter/Counter.html
+templates/utils/UUID.html
+```
+And in `Counter.html` you want to import `UUID.html` you will have to set your templates path like this 
+`Plate.setTemplates("templates");`and write your import like this `file="@/utils/UUID.html"`. This will
+result the component resolver to look for the `UUID` component at `templates/utils/UUID.html` while it
+is resolving `Counter.html`.
 
 Additionally, you have to provide a `name` attribute which provides a name as a string which you use
 within your template to place this component within your HTML like this:
@@ -312,7 +326,7 @@ The rendered HTML will be this:
 </div>
 ```
 
-### Properties
+## Properties
 To make components reusable you can pass properties to them. Properties have to be defined within
 a component's code and have to be passed down from the using view to the component with attributes.
 Properties have to be defined using the provided `Prop` element which has to have a `name` attribute.
@@ -350,7 +364,7 @@ This will result in the following rendered HTML:
 </div>
 ```
 
-### Properties in JavaScript
+## Properties in JavaScript
 When you define a property you can add the optional attribute `inScript` to make this also available within
 your script. You can then access it by using the `props` object which will be available within your 
 script section. 
@@ -379,7 +393,7 @@ counter.addEventListener("click", () => {
 If you want to pass properties to your script on your root view you will have to define these with the
 provided `Prop` element as well and flag them as `inScript`.
 
-### Slots
+## Slots
 Slots allow you to inject HTML from a using (parent) view into a component at predefined spots within
 their template. Slots can be named by adding a `name` attribute to them. To fill them at usage you have
 to define your HTML elements as children within your component usage within an element with the
@@ -480,6 +494,10 @@ This will result in the following rendered HTML:
     </div>
 </main>
 ```
+
+## Building Component Libraries for PLATE
+To do so simply build a jar and put your PLATE components under `src/main/resources/libs/YOUR_LIB_NAME`.
+Afterwards they can be imported like this: `@/libs/YOUR_COMPONENT.html`. 
 
 
 # Internationalization

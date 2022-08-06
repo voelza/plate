@@ -53,8 +53,7 @@ public class PlateTest {
 
     @Test
     public void staticTest() throws IOException {
-        final Model model = new Model();
-        test("src/test/resources/Test_Static/", model);
+        test("src/test/resources/Test_Static/", new Model());
     }
 
     @Test
@@ -122,7 +121,12 @@ public class PlateTest {
 
     @Test
     public void justCSS() throws IOException {
-        final Model model = new Model();
-        test("src/test/resources/JustCSS/", model);
+        test("src/test/resources/JustCSS/", new Model());
+    }
+
+    @Test
+    public void withMainResolvePath() throws IOException {
+        Plate.setTemplatesPath("src/test/resources/TestWithMainPath");
+        test("src/test/resources/TestWithMainPath/", new Model());
     }
 }
