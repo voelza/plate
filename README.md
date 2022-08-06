@@ -281,13 +281,14 @@ So if your file structure is like this:
 MyView.html
 counter/Counter.html
 ```
-Your `import` `file` attribute must look like this `file="/counter/Counter.html"`.
+Your `import` `file` attribute must look like this `file="counter/Counter.html"`. Beware to not start
+the file name with a slash `/`.
 
 Additionally, you have to provide a `name` attribute which provides a name as a string which you use
 within your template to place this component within your HTML like this:
 ```html
 MyView.html
-<import file="/counter/Counter.html" name="TheCounter"/>
+<import file="counter/Counter.html" name="TheCounter"/>
 <template>
     <div>
         <h1>My View has a counter:</h1>
@@ -319,7 +320,7 @@ Components only have access to properties from your model which were passed down
 
 So if our counter component has to have a start value you will have to define it like this:
 ```html
-/counter/Counter.html
+counter/Counter.html
 <prop name="startValue" />
 <template>
     $${startValue}
@@ -331,7 +332,7 @@ To pass down a property to a component you simply use its defined name with the 
 attribute and define an expression which represents the value of the property like this:
 ```html
 MyView.html
-<import file="/counter/Counter.html" name="TheCounter"/>
+<import file="counter/Counter.html" name="TheCounter"/>
 <template>
     <div>
         <h1>My View has a counter:</h1>
