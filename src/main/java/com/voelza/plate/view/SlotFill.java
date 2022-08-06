@@ -2,6 +2,7 @@ package com.voelza.plate.view;
 
 import com.voelza.plate.html.Element;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +27,17 @@ class SlotFill {
 
     ElementRenderResult render(final RenderContext renderContext) {
         return Renderer.render(renders,
+                new RenderContext(
+                        ExpressionResolver.merge(renderContext.expressionResolver(), renderContext.parentExpressionResolver()),
+                        Collections.emptyMap(),
+                        null
+                ));
+    }
+
+    ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        return Renderer.stream(
+                printWriter,
+                renders,
                 new RenderContext(
                         ExpressionResolver.merge(renderContext.expressionResolver(), renderContext.parentExpressionResolver()),
                         Collections.emptyMap(),

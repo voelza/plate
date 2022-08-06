@@ -1,5 +1,6 @@
 package com.voelza.plate.view;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Function;
 
@@ -37,5 +38,24 @@ class TemplatedElementRender implements ElementRender {
             html.append(closingTag);
         }
         return new ElementRenderResult(html.toString(), scriptPropFills);
+    }
+
+    @Override
+    public ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        final ExpressionResolver expressionResolver = renderContext.expressionResolver();
+
+        List<ScriptPropFill> scriptPropFills = null;
+        printWriter.print(startingTag.apply(expressionResolver));
+        printWriter.flush();
+        if (!isStandAloneTag) {
+            final ElementStreamResult result = Renderer.stream(printWriter, childRenders, renderContext);
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills = result.scriptPropFillsList();
+            }
+
+            printWriter.print(closingTag);
+            printWriter.flush();
+        }
+        return new ElementStreamResult(scriptPropFills);
     }
 }

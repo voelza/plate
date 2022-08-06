@@ -1,5 +1,6 @@
 package com.voelza.plate.view;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,5 +32,29 @@ class Renderer {
             return slotFill.render(renderContext);
         }
         return render.renderHTML(renderContext);
+    }
+
+    static ElementStreamResult stream(final PrintWriter printWriter, final List<ElementRender> renders, final RenderContext renderContext) {
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
+        for (final ElementRender render : renders) {
+            final ElementStreamResult result = stream(printWriter, render, renderContext);
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills.addAll(result.scriptPropFillsList());
+            }
+        }
+        return new ElementStreamResult(scriptPropFills);
+    }
+
+    private static ElementStreamResult stream(final PrintWriter printWriter,
+                                              final ElementRender render,
+                                              final RenderContext renderContext) {
+        if (render instanceof SlotElementRender slotRender) {
+            final SlotFill slotFill = renderContext.slotFills().get(slotRender.name);
+            if (slotFill == null) {
+                throw new IllegalStateException(String.format("Slot %s was not filled.", slotRender.name));
+            }
+            return slotFill.stream(printWriter, renderContext);
+        }
+        return render.stream(printWriter, renderContext);
     }
 }

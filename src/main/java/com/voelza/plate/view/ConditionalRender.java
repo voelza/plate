@@ -3,6 +3,7 @@ package com.voelza.plate.view;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 class ConditionalRender implements ElementRender {
@@ -26,5 +27,13 @@ class ConditionalRender implements ElementRender {
             return Renderer.render(renders, renderContext);
         }
         return new ElementRenderResult("");
+    }
+
+    @Override
+    public ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        if (renderContext.expressionResolver().evaluateCondition(this.condition)) {
+            return Renderer.stream(printWriter, renders, renderContext);
+        }
+        return new ElementStreamResult(null);
     }
 }

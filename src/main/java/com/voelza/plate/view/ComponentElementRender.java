@@ -4,6 +4,7 @@ import com.voelza.plate.Model;
 import com.voelza.plate.component.Slot;
 import com.voelza.plate.html.Element;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,5 +55,22 @@ class ComponentElementRender implements ElementRender {
         final String html =
                 view.render(scriptPropFills.size() > 0 ? uuid : null, model, this.slotFills, renderContext.expressionResolver());
         return new ElementRenderResult(html, scriptPropFills);
+    }
+
+    @Override
+    public ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        final String uuid = UUID.randomUUID().toString();
+        final Model model = new Model();
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
+        for (final PropFill propFill : propFills) {
+            final Object propValue = renderContext.expressionResolver().evaluate(propFill.propExpression);
+            model.add(propFill.name, propValue);
+            if (propFill.isScriptProp) {
+                scriptPropFills.add(new ScriptPropFill(uuid, propFill.name, propValue));
+            }
+        }
+
+        view.stream(printWriter, scriptPropFills.size() > 0 ? uuid : null, model, this.slotFills, renderContext.expressionResolver());
+        return new ElementStreamResult(scriptPropFills);
     }
 }

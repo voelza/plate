@@ -15,6 +15,7 @@ import com.voelza.plate.html.Element;
 import com.voelza.plate.utils.CollectionUtils;
 import com.voelza.plate.utils.StringUtils;
 
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -172,6 +173,29 @@ public class View {
         return addPropScriptIfNeeded(renderResult, model);
     }
 
+    public void stream(final PrintWriter printWriter, final Model model) {
+        stream(printWriter, null, model, Collections.emptyMap(), null);
+    }
+
+    void stream(
+            final PrintWriter printWriter,
+            final String uuid,
+            final Model model,
+            final Map<String, SlotFill> slotFills,
+            final ExpressionResolver parentExpressionResolver
+    ) {
+        final ExpressionResolver expressionResolver = new ExpressionResolver(model);
+        final ElementStreamResult streamResult = Renderer.stream(
+                printWriter,
+                uuid != null ? addUUIDRenders(uuid, renders) : renders,
+                new RenderContext(
+                        expressionResolver,
+                        slotFills,
+                        parentExpressionResolver
+                ));
+        Optional.ofNullable(getPropScript(streamResult.scriptPropFillsList(), model)).ifPresent(printWriter::print);
+    }
+
     private List<ElementRender> addUUIDRenders(final String uuid, final List<ElementRender> renders) {
         final UUIDElementRender uuidElementRender = new UUIDElementRender(uuid);
         final List<ElementRender> newRenders = new ArrayList<>();
@@ -191,33 +215,41 @@ public class View {
                 return resultHTML;
             }
 
-            final Map<String, List<ScriptPropFill>> scriptFillProps = new HashMap<>();
-            scriptFillProps.put(
-                    "main",
-                    this.props
-                            .stream()
-                            .filter(p -> p.inScript).map(p -> new ScriptPropFill("main", p.name, model.get(p.name)))
-                            .toList());
-
-            for (final ScriptPropFill scriptPropFill : renderResult.scriptPropFillsList()) {
-                List<ScriptPropFill> fills = scriptFillProps.get(scriptPropFill.uuid());
-                if (fills == null) {
-                    fills = new ArrayList<>();
-                }
-                fills.add(scriptPropFill);
-                scriptFillProps.put(scriptPropFill.uuid(), fills);
-            }
-
-            final String propScript = String.format(
-                    "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
-                    String.join(
-                            ",",
-                            scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()
-                    )
-            );
+            final String propScript = getPropScript(renderResult.scriptPropFillsList(), model);
             resultHTML = resultHTML.substring(0, bodyEndIndex) + propScript + resultHTML.substring(bodyEndIndex);
         }
         return resultHTML;
+    }
+
+    private String getPropScript(final List<ScriptPropFill> scriptPropFills, final Model model) {
+        if (scriptPropFills.isEmpty()) {
+            return null;
+        }
+
+        final Map<String, List<ScriptPropFill>> scriptFillProps = new HashMap<>();
+        scriptFillProps.put(
+                "main",
+                this.props
+                        .stream()
+                        .filter(p -> p.inScript).map(p -> new ScriptPropFill("main", p.name, model.get(p.name)))
+                        .toList());
+
+        for (final ScriptPropFill scriptPropFill : scriptPropFills) {
+            List<ScriptPropFill> fills = scriptFillProps.get(scriptPropFill.uuid());
+            if (fills == null) {
+                fills = new ArrayList<>();
+            }
+            fills.add(scriptPropFill);
+            scriptFillProps.put(scriptPropFill.uuid(), fills);
+        }
+
+        return String.format(
+                "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
+                String.join(
+                        ",",
+                        scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()
+                )
+        );
     }
 
     private String createScriptPropDeclaration(final Map.Entry<String, List<ScriptPropFill>> scriptPropsFills) {

@@ -4,6 +4,7 @@ import com.voelza.plate.Model;
 import com.voelza.plate.html.Attribute;
 import com.voelza.plate.html.Element;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,7 +38,6 @@ class ForEachRender implements ElementRender {
         final Iterator<?> iterator = collection.iterator();
         int index = 0;
         while (iterator.hasNext()) {
-
             final Model loopModel = new Model();
             loopModel.add(elementName, iterator.next());
             loopModel.add("_index", index);
@@ -54,5 +54,36 @@ class ForEachRender implements ElementRender {
         }
 
         return new ElementRenderResult(html.toString(), scriptPropFills);
+    }
+
+    @Override
+    public ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        final Collection<?> collection = renderContext.expressionResolver().evaluateCollection(this.collectionExpression);
+
+        final List<ScriptPropFill> scriptPropFills = new ArrayList<>();
+        final Iterator<?> iterator = collection.iterator();
+        int index = 0;
+        while (iterator.hasNext()) {
+            final Model loopModel = new Model();
+            loopModel.add(elementName, iterator.next());
+            loopModel.add("_index", index);
+            final ExpressionResolver expressionResolver = renderContext.expressionResolver().withAdditionalModel(loopModel);
+
+            final ElementStreamResult result = Renderer.stream(
+                    printWriter,
+                    renders,
+                    new RenderContext(
+                            expressionResolver,
+                            Collections.emptyMap(),
+                            null)
+            );
+            if (result.scriptPropFillsList() != null) {
+                scriptPropFills.addAll(result.scriptPropFillsList());
+            }
+
+            index++;
+        }
+
+        return new ElementStreamResult(scriptPropFills);
     }
 }
