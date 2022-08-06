@@ -24,4 +24,8 @@ public class CollectionUtils {
 
         return new ArrayList<T>(set);
     }
+
+    public static boolean isEmpty(final Collection<?> collection) {
+        return collection == null || collection.size() == 0;
+    }
 }

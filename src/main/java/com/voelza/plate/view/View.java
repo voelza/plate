@@ -170,7 +170,9 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
-        return addPropScriptIfNeeded(renderResult, model);
+        return getPropScript(renderResult.scriptPropFillsList(), model)
+                .map(propScript -> renderResult.html() + propScript)
+                .orElse(renderResult.html());
     }
 
     public void stream(final PrintWriter printWriter, final Model model) {
@@ -193,7 +195,7 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
-        Optional.ofNullable(getPropScript(streamResult.scriptPropFillsList(), model)).ifPresent(printWriter::print);
+        getPropScript(streamResult.scriptPropFillsList(), model).ifPresent(printWriter::print);
     }
 
     private List<ElementRender> addUUIDRenders(final String uuid, final List<ElementRender> renders) {
@@ -206,19 +208,12 @@ public class View {
         return Collections.unmodifiableList(newRenders);
     }
 
-    private String addPropScriptIfNeeded(final ElementRenderResult renderResult, final Model model) {
-        String resultHTML = renderResult.html();
-        if (this.viewOrigin == ViewOrigin.ROOT
-                && (CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList()) || CollectionUtils.isNotEmpty(this.props))) {
-            final String propScript = getPropScript(renderResult.scriptPropFillsList(), model);
-            resultHTML = resultHTML + propScript;
-        }
-        return resultHTML;
-    }
-
-    private String getPropScript(final List<ScriptPropFill> scriptPropFills, final Model model) {
-        if (scriptPropFills.isEmpty()) {
-            return null;
+    private Optional<String> getPropScript(final List<ScriptPropFill> scriptPropFills, final Model model) {
+        if (
+                this.viewOrigin != ViewOrigin.ROOT
+                        || (CollectionUtils.isEmpty(scriptPropFills) && CollectionUtils.isEmpty(this.props))
+        ) {
+            return Optional.empty();
         }
 
         final Map<String, List<ScriptPropFill>> scriptFillProps = new HashMap<>();
@@ -238,13 +233,14 @@ public class View {
             scriptFillProps.put(scriptPropFill.uuid(), fills);
         }
 
-        return String.format(
-                "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
-                String.join(
-                        ",",
-                        scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()
-                )
-        );
+        return Optional.of(
+                String.format(
+                        "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
+                        String.join(
+                                ",",
+                                scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()
+                        )
+                ));
     }
 
     private String createScriptPropDeclaration(final Map.Entry<String, List<ScriptPropFill>> scriptPropsFills) {
