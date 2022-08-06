@@ -479,3 +479,50 @@ This will result in the following rendered HTML:
     </div>
 </main>
 ```
+
+
+# Internationalization
+If you need internationalization for your views you can provide them by setting a supply function
+to `Plate::setTranslations`. This function takes in a function which as to return a 
+`Map<Locale, Map<String, String>>`. If you provided translations for a certain locale you can access
+them within your view with this syntax: `##{key}`. If there was no translation for a given locale found
+it will default to english.
+
+For example, given you provided these translations:
+```java
+Plate.setTranslations(() -> {
+    final Map<String, String> english = new HashMap<>();
+    english.put("welcome.text", "Hello World!");
+
+    final Map<String, String> german = new HashMap<>();
+    german.put("welcome.text", "Hallo Welt!");
+
+    final Map<Locale, Map<String, String>> translations = new HashMap<>();
+    translations.put(Locale.ENGLISH, english);
+    translations.put(Locale.GERMAN, german);
+    return translations;
+});
+```
+
+Then you can use the translation with the key `welcome.text` within your template like this:
+```html
+<template>
+    <h1>##{welcome.text}</h1>
+</template>
+```
+
+This will be rendered into this into these versions depending on the client locale.
+
+EN:
+```html
+<template>
+    <h1>Hello World!</h1>
+</template>
+```
+
+DE:
+```html
+<template>
+    <h1>Hallo Welt!</h1>
+</template>
+```
