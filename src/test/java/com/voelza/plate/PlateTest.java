@@ -2,9 +2,11 @@ package com.voelza.plate;
 
 import com.voelza.plate.view.View;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 public class PlateTest {
@@ -33,9 +37,17 @@ public class PlateTest {
                 return new UUID(1, leastSigBit.incrementAndGet());
             });
             final View view = new View(testDir + "templates/Test.html", Locale.ENGLISH);
-            assertThat(view.render(model), is(loadResultFile(testDir + "result/index.html")));
+            final String resultHTML = loadResultFile(testDir + "result/index.html");
+            assertThat(view.render(model), is(resultHTML));
             assertThat(view.getCSS(), is(loadResultFile(testDir + "result/index.css")));
             assertThat(view.getJavaScript(), is(loadResultFile(testDir + "result/index.js")));
+
+            leastSigBit.set(0);
+            final PrintWriter printWriter = mock(PrintWriter.class);
+            final ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
+            doNothing().when(printWriter).print(htmlCaptor.capture());
+            view.stream(printWriter, model);
+            assertThat(String.join("", htmlCaptor.getAllValues()), is(resultHTML));
         }
     }
 

@@ -210,13 +210,8 @@ public class View {
         String resultHTML = renderResult.html();
         if (this.viewOrigin == ViewOrigin.ROOT
                 && (CollectionUtils.isNotEmpty(renderResult.scriptPropFillsList()) || CollectionUtils.isNotEmpty(this.props))) {
-            final int bodyEndIndex = resultHTML.indexOf("</body>");
-            if (bodyEndIndex == -1) {
-                return resultHTML;
-            }
-
             final String propScript = getPropScript(renderResult.scriptPropFillsList(), model);
-            resultHTML = resultHTML.substring(0, bodyEndIndex) + propScript + resultHTML.substring(bodyEndIndex);
+            resultHTML = resultHTML + propScript;
         }
         return resultHTML;
     }
