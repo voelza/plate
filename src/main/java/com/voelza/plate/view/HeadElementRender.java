@@ -3,6 +3,7 @@ package com.voelza.plate.view;
 import com.voelza.plate.Version;
 import com.voelza.plate.html.Element;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,5 +35,15 @@ class HeadElementRender implements ElementRender {
     public ElementRenderResult renderHTML(final RenderContext renderContext) {
         final ElementRenderResult renderResult = Renderer.render(childRenders, renderContext);
         return new ElementRenderResult("<head>" + renderResult.html() + "</head>", renderResult.scriptPropFillsList());
+    }
+
+    @Override
+    public ElementStreamResult stream(final PrintWriter printWriter, final RenderContext renderContext) {
+        printWriter.print("<head>");
+        printWriter.flush();
+        final ElementStreamResult result = Renderer.stream(printWriter, childRenders, renderContext);
+        printWriter.print("</head>");
+        printWriter.flush();
+        return result;
     }
 }
