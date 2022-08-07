@@ -22,7 +22,7 @@ following format:
 
 Your `style` and `script` will not be shown in the rendered HTML response but will be linked with `link` and `script`
 tags within the `head` element (if you provided it in your template). These links will try to get the resources under
-the path `/plate/css/VIEWNAME.css' and `/plate/js/VIEWNAME.js'. This library itself does not provide the endpoints to
+the path `/plate/css/VIEWNAME.css` and `/plate/js/VIEWNAME.js`. This library itself does not provide the endpoints to
 your application, but you can use adapters to hook theses into it.
 
 ### Usage without adapters
