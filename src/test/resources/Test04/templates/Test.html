@@ -1,0 +1,35 @@
+<import file="Header.html" name="the-header"/>
+<import file="content/Post.html" name="Post"/>
+
+<prop name="peoples" inScript/>
+<prop name="status" inScript/>
+
+<template>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>$${title} $${status}</title>
+    </head>
+    <body>
+    <the-header $$title="'Hello!'" $$justForJS="'Hello JS!'"></the-header>
+    <main>
+        <Render if="peoples.size() > 0">
+            <ForEach collection="peoples" element="p">
+                <post $$content="p.name()"></post>
+            </ForEach>
+        </Render>
+        <Render if="peoples.size() <= 0">
+            There was no person found.
+        </Render>
+    </main>
+    </body>
+    </html>
+</template>
+
+<script>
+console.log("hello");
+
+
+
+</script>

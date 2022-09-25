@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -129,4 +130,17 @@ public class PlateTest {
         Plate.setTemplatesPath("src/test/resources/TestWithMainPath");
         test("src/test/resources/TestWithMainPath/", new Model());
     }
+
+    @Test
+    public void stream() throws IOException {
+        final Model model = new Model();
+        model.add("title", "Website Title");
+        model.add("peoples", List.of(new Person("Achim"), new Person("Joachim")));
+        model.add("status", Executors.newSingleThreadExecutor().submit(() -> {
+            Thread.sleep(1000);
+            return 200;
+        }));
+        test("src/test/resources/Test04/", model);
+    }
+
 }

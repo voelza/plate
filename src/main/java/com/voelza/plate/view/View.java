@@ -187,7 +187,7 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
-        return getPropScript(renderResult.scriptPropFillsList(), model)
+        return getPropScript(renderResult.scriptPropFillsList(), expressionResolver)
                 .map(propScript -> renderResult.html() + propScript)
                 .orElse(renderResult.html());
     }
@@ -212,7 +212,7 @@ public class View {
                         slotFills,
                         parentExpressionResolver
                 ));
-        getPropScript(streamResult.scriptPropFillsList(), model).ifPresent(printWriter::print);
+        getPropScript(streamResult.scriptPropFillsList(), expressionResolver).ifPresent(printWriter::print);
     }
 
     private List<ElementRender> addUUIDRenders(final String uuid, final List<ElementRender> renders) {
@@ -225,11 +225,8 @@ public class View {
         return Collections.unmodifiableList(newRenders);
     }
 
-    private Optional<String> getPropScript(final List<ScriptPropFill> scriptPropFills, final Model model) {
-        if (
-                this.viewOrigin != ViewOrigin.ROOT
-                        || (CollectionUtils.isEmpty(scriptPropFills) && CollectionUtils.isEmpty(this.props))
-        ) {
+    private Optional<String> getPropScript(final List<ScriptPropFill> scriptPropFills, final ExpressionResolver expressionResolver) {
+        if (this.viewOrigin != ViewOrigin.ROOT || (CollectionUtils.isEmpty(scriptPropFills) && CollectionUtils.isEmpty(this.props))) {
             return Optional.empty();
         }
 
@@ -238,7 +235,7 @@ public class View {
                 "main",
                 this.props
                         .stream()
-                        .filter(p -> p.inScript).map(p -> new ScriptPropFill("main", p.name, model.get(p.name)))
+                        .filter(p -> p.inScript).map(p -> new ScriptPropFill("main", p.name, expressionResolver.evaluate(p.name)))
                         .toList());
 
         for (final ScriptPropFill scriptPropFill : scriptPropFills) {

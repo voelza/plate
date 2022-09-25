@@ -5,7 +5,6 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -21,10 +20,8 @@ public class ExpressionResolver {
 
     public ExpressionResolver(final Model model) {
         jexl = new JexlBuilder().create();
-        jexlContext = new MapContext();
-
+        jexlContext = new ModelContext(model);
         this.model = model;
-        model.forEach(jexlContext::set);
     }
 
     public static ExpressionResolver merge(final ExpressionResolver resolver1, final ExpressionResolver resolver2) {
@@ -47,8 +44,7 @@ public class ExpressionResolver {
     }
 
     public boolean evaluateCondition(final String condition) {
-        final JexlExpression e = jexl.createExpression(condition);
-        final Object result = e.evaluate(jexlContext);
+        final Object result = evaluate(condition);
         if (result instanceof Boolean r) {
             return r;
         }
@@ -56,8 +52,7 @@ public class ExpressionResolver {
     }
 
     public Collection<?> evaluateCollection(final String expression) {
-        final JexlExpression e = jexl.createExpression(expression);
-        final Object result = e.evaluate(jexlContext);
+        final Object result = evaluate(expression);
         if (result instanceof Collection<?> collection) {
             return collection;
         }
@@ -67,4 +62,5 @@ public class ExpressionResolver {
         }
         throw new IllegalArgumentException(String.format("Collection expression \"%s\" does not result in a collection value", expression));
     }
+
 }

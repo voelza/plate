@@ -30,7 +30,7 @@ To create a `View` you simply create a new `View` object. You pass in the path t
 from your client for translations.
 
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
+View view = new View("MyView.html", Locale.ENGLISH);
 ```
 
 Afterwards you can use your view to generate the HTML with the `render` function or to stream your html directly 
@@ -38,20 +38,41 @@ onto a `PrintWriter` with `stream`. To all these methods you have to provide a `
 you store the data you want to be rendered into your views templates.
 
 ```java 
-final Model model = new Model();
+Model model = new Model();
 model.add("message", "Hello World");
 
-final String html = view.render(model);
+String html = view.render(model);
 // or
-final PrintWriter responseWriter = response.getWriter();
+PrintWriter responseWriter = response.getWriter();
 view.stream(responseWriter, model);
 responseWriter.close();
 ```
 
 To retrieve the `style` or `script` sections of your view you have to call `View::getCSS` or `View::getJavaScript`.
 ```java 
-final String css = view.getCSS();
-final String javaScript = view.getJavaScript();
+ String css = view.getCSS();
+ String javaScript = view.getJavaScript();
+```
+
+If you are streaming HTML you might want to deliver some parts of your website before you go 
+and fetch data for the rest of the page. To do so you can simply use a build in Java `Future` as the
+data within your model. When this data is first needed it will automatically be resolved and the 
+resulting value will be stored within the model in the `Future` place. This means Futures will only
+resolve once. Beware that resolving Futures will block the painting thread because HTML is hierarchical 
+and we have to ensure certain paint-ordering. But you can use this feature to your advantage to stream
+certain parts of your page before you go and fetch heavy data.
+
+```java
+Model model = new Model();
+model.add("message", Executors.newSingleThreadExecutor().submit(
+        () -> {
+            Thread.sleep(1000);
+            return "Hello World!";
+        }));
+
+PrintWriter responseWriter = response.getWriter();
+view.stream(responseWriter, model);
+responseWriter.close();
 ```
 
 ### Adapters:
@@ -99,8 +120,8 @@ MyView.html
 ```
 And you render it like this:
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("message", "Hello World");
 view.render(model);
 ```
@@ -121,8 +142,8 @@ MyView.html
 ```
 And you render it like this:
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("color", "green");
 view.render(model);
 ```
@@ -149,8 +170,8 @@ MyView.html
 ```
 And you render it like this:
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("price", 18);
 view.render(model);
 ```
@@ -161,8 +182,8 @@ Will result in:
 
 But if you change the value of price to 21. It will render something different:
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("price", 21);
 view.render(model);
 ```
@@ -191,8 +212,8 @@ You render it like this:
 ```java
 public record Student(String name) { }
 [...]
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("students", List.of(
         new Student("paul"), 
         new Student("george"),
@@ -249,8 +270,8 @@ MyView.html
 ```
 You render it like this:
 ```java
-final View view = new View("MyView.html", Locale.ENGLISH);
-final Model model = new Model();
+ View view = new View("MyView.html", Locale.ENGLISH);
+ Model model = new Model();
 model.add("htmlFromJava","<script>alert('hello!');</script>");
 view.render(model);
 ```
@@ -510,13 +531,13 @@ it will default to english.
 For example, given you provided these translations:
 ```java
 Plate.setTranslations(() -> {
-    final Map<String, String> english = new HashMap<>();
+     Map<String, String> english = new HashMap<>();
     english.put("welcome.text", "Hello World!");
 
-    final Map<String, String> german = new HashMap<>();
+     Map<String, String> german = new HashMap<>();
     german.put("welcome.text", "Hallo Welt!");
 
-    final Map<Locale, Map<String, String>> translations = new HashMap<>();
+     Map<Locale, Map<String, String>> translations = new HashMap<>();
     translations.put(Locale.ENGLISH, english);
     translations.put(Locale.GERMAN, german);
     return translations;
