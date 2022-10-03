@@ -518,7 +518,7 @@ This will result in the following rendered HTML:
 
 ## Building Component Libraries for PLATE
 To do so simply build a jar and put your PLATE components under `src/main/resources/libs/YOUR_LIB_NAME`.
-Afterwards they can be imported like this: `@/libs/YOUR_COMPONENT.html`. 
+Afterwards they can be imported like this: `@/libs/YOUR_LIB_NAME/YOUR_COMPONENT.html`. 
 
 
 # Internationalization
