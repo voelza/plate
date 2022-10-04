@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -136,10 +136,15 @@ public class PlateTest {
         final Model model = new Model();
         model.add("title", "Website Title");
         model.add("peoples", List.of(new Person("Achim"), new Person("Joachim")));
-        model.add("status", Executors.newSingleThreadExecutor().submit(() -> {
-            Thread.sleep(1000);
+        Supplier<Integer> statusSupplier = () -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             return 200;
-        }));
+        };
+        model.add("status", statusSupplier);
         test("src/test/resources/Test04/", model);
     }
 

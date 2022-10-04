@@ -5,8 +5,7 @@ import org.apache.commons.jexl3.JexlContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 class ModelContext implements JexlContext {
 
@@ -20,13 +19,9 @@ class ModelContext implements JexlContext {
     @Override
     public Object get(final String s) {
         Object value = this.values.get(s);
-        if (value instanceof Future<?> future) {
-            try {
-                value = future.get();
-                this.values.put(s, value);
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException(ex);
-            }
+        if (value instanceof Supplier<?> supplier) {
+            value = supplier.get();
+            this.values.put(s, value);
         }
         return value;
     }
