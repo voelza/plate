@@ -90,7 +90,7 @@ public class Component {
                 .getAttribute("name")
                 .map(Attribute::value)
                 .orElse("default");
-        return new Slot(name, element.children());
+        return new Slot(name);
     }
 
     public String getPath() {
