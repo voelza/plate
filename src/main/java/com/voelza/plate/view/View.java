@@ -183,6 +183,7 @@ public class View {
         final ElementRenderResult renderResult = Renderer.render(
                 uuid != null ? addUUIDRenders(uuid, renders) : renders,
                 new RenderContext(
+                        this.name,
                         expressionResolver,
                         slotFills,
                         parentExpressionResolver
@@ -208,6 +209,7 @@ public class View {
                 printWriter,
                 uuid != null ? addUUIDRenders(uuid, renders) : renders,
                 new RenderContext(
+                        this.name,
                         expressionResolver,
                         slotFills,
                         parentExpressionResolver

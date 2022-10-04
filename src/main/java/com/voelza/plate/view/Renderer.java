@@ -27,7 +27,7 @@ class Renderer {
         if (render instanceof SlotElementRender slotRender) {
             final SlotFill slotFill = renderContext.slotFills().get(slotRender.name);
             if (slotFill == null) {
-                throw new IllegalStateException(String.format("Slot %s was not filled.", slotRender.name));
+                throw new IllegalStateException(String.format("[%s]: Slot %s was not filled.", renderContext.viewName(), slotRender.name));
             }
             return slotFill.render(renderContext);
         }

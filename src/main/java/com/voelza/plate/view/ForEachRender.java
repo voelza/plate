@@ -44,7 +44,12 @@ class ForEachRender implements ElementRender {
             final ExpressionResolver expressionResolver = renderContext.expressionResolver().withAdditionalModel(loopModel);
 
             final ElementRenderResult result =
-                    Renderer.render(renders, new RenderContext(expressionResolver, Collections.emptyMap(), null));
+                    Renderer.render(renders, new RenderContext(
+                            renderContext.viewName(),
+                            expressionResolver,
+                            Collections.emptyMap(),
+                            null
+                    ));
             html.append(result.html());
             if (result.scriptPropFillsList() != null) {
                 scriptPropFills.addAll(result.scriptPropFillsList());
@@ -73,6 +78,7 @@ class ForEachRender implements ElementRender {
                     printWriter,
                     renders,
                     new RenderContext(
+                            renderContext.viewName(),
                             expressionResolver,
                             Collections.emptyMap(),
                             null)

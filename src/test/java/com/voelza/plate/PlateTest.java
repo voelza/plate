@@ -148,4 +148,13 @@ public class PlateTest {
         test("src/test/resources/Test04/", model);
     }
 
+    @Test
+    public void withSlots() throws IOException {
+        test("src/test/resources/TestWithSlots/", new Model());
+    }
+
+    @Test
+    public void withSlotsWithinSlots() throws IOException {
+        test("src/test/resources/TestWithSlotsWithinSlots/", new Model());
+    }
 }

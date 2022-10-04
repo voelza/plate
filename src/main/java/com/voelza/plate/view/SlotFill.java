@@ -28,6 +28,7 @@ class SlotFill {
     ElementRenderResult render(final RenderContext renderContext) {
         return Renderer.render(renders,
                 new RenderContext(
+                        renderContext.viewName(),
                         ExpressionResolver.merge(renderContext.expressionResolver(), renderContext.parentExpressionResolver()),
                         Collections.emptyMap(),
                         null
@@ -39,6 +40,7 @@ class SlotFill {
                 printWriter,
                 renders,
                 new RenderContext(
+                        renderContext.viewName(),
                         ExpressionResolver.merge(renderContext.expressionResolver(), renderContext.parentExpressionResolver()),
                         Collections.emptyMap(),
                         null

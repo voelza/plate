@@ -48,16 +48,9 @@ public interface Element {
         return attributes().stream().filter(a -> a.name().equalsIgnoreCase(name)).findFirst();
     }
 
-    default List<Element> findChildrenByName(final String name) {
-        return children()
-                .stream()
-                .filter(c -> c.name().equalsIgnoreCase(name))
-                .toList();
-    }
-
     default List<Element> findElementsByName(final String name) {
         final List<Element> foundElements = new ArrayList<>(
-                findChildrenByName(name)
+                children()
                         .stream()
                         .map(c -> c.findElementsByName(name))
                         .flatMap(List::stream)
