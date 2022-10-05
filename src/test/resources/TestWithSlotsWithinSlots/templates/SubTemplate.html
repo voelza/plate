@@ -1,8 +1,9 @@
 <import file="Template.html" name="tmpl"/>
+<prop name="title"/>
 
 <template>
     <slot/>
-    <tmpl>
+    <tmpl $$title="title">
         <default>
             <slot name="content"/>
         </default>

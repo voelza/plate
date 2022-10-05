@@ -155,6 +155,8 @@ public class PlateTest {
 
     @Test
     public void withSlotsWithinSlots() throws IOException {
-        test("src/test/resources/TestWithSlotsWithinSlots/", new Model());
+        final Model model = new Model();
+        model.add("title", "My Website");
+        test("src/test/resources/TestWithSlotsWithinSlots/", model);
     }
 }
