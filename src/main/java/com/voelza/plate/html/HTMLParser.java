@@ -31,7 +31,8 @@ public class HTMLParser {
             "wbr",
             "import",
             "prop",
-            "unsafe");
+            "unsafe",
+            "slot");
 
     private static boolean isStandaloneTag(final String name) {
         return HTMLParser.STAND_ALONE_TAGS.contains(name.toLowerCase());

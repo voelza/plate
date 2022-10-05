@@ -53,7 +53,7 @@ class RenderCreator {
                 continue;
             }
 
-            if (element.name().equalsIgnoreCase(Syntax.SLOT.token)) {
+            if (Syntax.SLOT.token.equalsIgnoreCase(element.name())) {
                 renders.add(new SlotElementRender(element));
                 continue;
             }

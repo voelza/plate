@@ -7,7 +7,6 @@ import com.voelza.plate.html.Element;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,7 +46,7 @@ class ForEachRender implements ElementRender {
                     Renderer.render(renders, new RenderContext(
                             renderContext.viewName(),
                             expressionResolver,
-                            Collections.emptyMap(),
+                            SlotFills.empty(),
                             null
                     ));
             html.append(result.html());
@@ -80,7 +79,7 @@ class ForEachRender implements ElementRender {
                     new RenderContext(
                             renderContext.viewName(),
                             expressionResolver,
-                            Collections.emptyMap(),
+                            SlotFills.empty(),
                             null)
             );
             if (result.scriptPropFillsList() != null) {

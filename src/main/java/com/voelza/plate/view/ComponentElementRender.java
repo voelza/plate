@@ -52,8 +52,11 @@ class ComponentElementRender implements ElementRender {
             }
         }
 
-        final String html =
-                view.render(scriptPropFills.size() > 0 ? uuid : null, model, this.slotFills, renderContext.expressionResolver());
+        final String html = view.render(
+                scriptPropFills.size() > 0 ? uuid : null,
+                model,
+                new SlotFills(this.slotFills, renderContext.slotFills()),
+                renderContext.expressionResolver());
         return new ElementRenderResult(html, scriptPropFills);
     }
 
@@ -70,7 +73,13 @@ class ComponentElementRender implements ElementRender {
             }
         }
 
-        view.stream(printWriter, scriptPropFills.size() > 0 ? uuid : null, model, this.slotFills, renderContext.expressionResolver());
+        view.stream(
+                printWriter,
+                scriptPropFills.size() > 0 ? uuid : null,
+                model,
+                new SlotFills(this.slotFills, renderContext.slotFills()),
+                renderContext.expressionResolver()
+        );
         return new ElementStreamResult(scriptPropFills);
     }
 }

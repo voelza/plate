@@ -170,13 +170,13 @@ public class View {
     }
 
     public String render(final Model model) {
-        return render(null, model, Collections.emptyMap(), null);
+        return render(null, model, SlotFills.empty(), null);
     }
 
     String render(
             final String uuid,
             final Model model,
-            final Map<String, SlotFill> slotFills,
+            final SlotFills slotFills,
             final ExpressionResolver parentExpressionResolver
     ) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);
@@ -194,14 +194,14 @@ public class View {
     }
 
     public void stream(final PrintWriter printWriter, final Model model) {
-        stream(printWriter, null, model, Collections.emptyMap(), null);
+        stream(printWriter, null, model, SlotFills.empty(), null);
     }
 
     void stream(
             final PrintWriter printWriter,
             final String uuid,
             final Model model,
-            final Map<String, SlotFill> slotFills,
+            final SlotFills slotFills,
             final ExpressionResolver parentExpressionResolver
     ) {
         final ExpressionResolver expressionResolver = new ExpressionResolver(model);

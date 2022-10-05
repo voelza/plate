@@ -1,9 +1,10 @@
 <import file="Template.html" name="tmpl"/>
 
 <template>
+    <slot/>
     <tmpl>
         <default>
-            <slot/>
+            <slot name="content"/>
         </default>
     </tmpl>
 </template>
