@@ -13,6 +13,7 @@ import java.util.List;
 class ForEachRender implements ElementRender {
     private final String collectionExpression;
     private final String elementName;
+    private final String indexName;
     private final List<ElementRender> renders;
 
     ForEachRender(
@@ -25,6 +26,9 @@ class ForEachRender implements ElementRender {
         this.elementName = element.getAttribute("element")
                 .map(Attribute::value)
                 .orElseThrow(() -> new IllegalStateException("ForEach element needs 'element' attribute."));
+        this.indexName = element.getAttribute("index")
+                .map(Attribute::value)
+                .orElse(null);
         this.renders = RenderCreator.create(options.newElements(element.children()));
     }
 
@@ -39,7 +43,9 @@ class ForEachRender implements ElementRender {
         while (iterator.hasNext()) {
             final Model loopModel = new Model();
             loopModel.add(elementName, iterator.next());
-            loopModel.add("_index", index);
+            if (this.indexName != null) {
+                loopModel.add(this.indexName, index);
+            }
             final ExpressionResolver expressionResolver = renderContext.expressionResolver().withAdditionalModel(loopModel);
 
             final ElementRenderResult result =
@@ -70,7 +76,9 @@ class ForEachRender implements ElementRender {
         while (iterator.hasNext()) {
             final Model loopModel = new Model();
             loopModel.add(elementName, iterator.next());
-            loopModel.add("_index", index);
+            if (this.indexName != null) {
+                loopModel.add(this.indexName, index);
+            }
             final ExpressionResolver expressionResolver = renderContext.expressionResolver().withAdditionalModel(loopModel);
 
             final ElementStreamResult result = Renderer.stream(

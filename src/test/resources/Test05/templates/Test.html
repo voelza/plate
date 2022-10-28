@@ -1,0 +1,20 @@
+<template>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Loop Tests</title>
+    </head>
+    <body>
+    <main>
+        <ForEach collection="map" element="row" index="i">
+            <div>
+                <ForEach collection="row" element="cell" index="j">
+                    <div>$${map[i][j]}</div>
+                </ForEach>
+            </div>
+        </ForEach>
+    </main>
+    </body>
+    </html>
+</template>

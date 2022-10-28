@@ -236,15 +236,16 @@ It will result in the following html:
 </ul>
 ```
 
-Additionally, you have access to the current index in each render cycle using the `_index` expression
-which will automatically added to your model. If we for example use the same render code with this
-template:
+Additionally, you have access to the current index in each render cycle using the `index` attribute on the `ForEach`
+element and define a name for the index which will automatically added to your model. 
+
+If we for example use the same render code with this template:
 ```html
 MyView.html
 <template>
     <ul>
-        <ForEach collection="students" element="student">
-            <li>$${_index + ': ' + student.name()}</li>
+        <ForEach collection="students" element="student" index="i">
+            <li>$${i + ': ' + student.name()}</li>
         </ForEach>
     </ul>
 </template>

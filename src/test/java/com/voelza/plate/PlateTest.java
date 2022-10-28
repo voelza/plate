@@ -159,4 +159,12 @@ public class PlateTest {
         model.add("title", "My Website");
         test("src/test/resources/TestWithSlotsWithinSlots/", model);
     }
+
+    @Test
+    public void loopTest() throws IOException {
+        final Model model = new Model();
+        final List<List<Integer>> map = List.of(List.of(1, 2, 3), List.of(4, 5, 6), List.of(7, 8, 9));
+        model.add("map", map);
+        test("src/test/resources/Test05/", model);
+    }
 }

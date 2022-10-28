@@ -12,7 +12,7 @@
     <the-header $$title="'Hello!'"></the-header>
     <main>
         <Render if="peoples.size() > 0">
-            <ForEach collection="peoples" element="person">
+            <ForEach collection="peoples" element="person" index="_index">
                 <post>
                     <default>$${_index + 1}: $${title} $${person.name()}</default>
                 </post>
@@ -28,5 +28,6 @@
 
 <script>
 console.log("hello");
+
 
 </script>
