@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class View {
@@ -33,6 +34,7 @@ public class View {
     private static final String SETUP_PREFIX = "data-p-setup-";
     private static final ObjectMapper JSON_PARSER = new ObjectMapper();
 
+    private final String rootKey;
     private final ViewOrigin viewOrigin;
     private final String name;
     private final String directoryPath;
@@ -49,20 +51,38 @@ public class View {
     private final String declaredJavaScript;
     private final String viewJavaScript;
 
+    private final AtomicBoolean hasCSS;
+    private final AtomicBoolean hasJavaScript;
+
     public View(final String path, final Locale locale) {
-        this(path, locale, ViewOrigin.ROOT);
+        this(path, path, locale, ViewOrigin.ROOT, new AtomicBoolean(false), new AtomicBoolean(false));
     }
 
-    public View(final String path, final Locale locale, final ViewOrigin viewOrigin) {
+    public View(
+            final String path,
+            final String rootKey,
+            final Locale locale,
+            final ViewOrigin viewOrigin,
+            final AtomicBoolean hasCSS,
+            final AtomicBoolean hasJavaScript
+    ) {
         this.viewOrigin = viewOrigin;
 
-        String viewKey = ViewKeyCreator.create(path);
+        final String viewKey = ViewKeyCreator.create(path);
+        if (ViewOrigin.ROOT == this.viewOrigin) {
+            this.rootKey = viewKey;
+        } else {
+            this.rootKey = rootKey;
+        }
+
         final Path filePath = Path.of(path);
         final String fileName = filePath.getFileName().toString();
         final int extensionIndex = fileName.lastIndexOf(".");
         this.name = fileName.substring(0, extensionIndex != -1 ? extensionIndex : fileName.length()).toLowerCase();
         this.directoryPath = Optional.ofNullable(filePath.getParent()).map(Path::toString).orElse("");
         this.locale = locale;
+        this.hasCSS = hasCSS;
+        this.hasJavaScript = hasJavaScript;
 
         final Component component = getComponent(path, locale);
         subViews = resolveImports(component.getImports());
@@ -72,6 +92,11 @@ public class View {
 
         declaredJavaScript = component.getScript().orElse("");
         viewJavaScript = ViewOrigin.ROOT == viewOrigin ? collectJavaScript(getDeclaredJavaScript(), subViews) : null;
+
+        if (ViewOrigin.ROOT == viewOrigin) {
+            this.hasCSS.set(StringUtils.hasText(viewCSS));
+            this.hasJavaScript.set(StringUtils.hasText(viewJavaScript));
+        }
 
         props = component.getProps();
         slots = component.getSlots();
@@ -83,8 +108,9 @@ public class View {
         renders = RenderCreator.create(
                 new RenderCreatorOptions(
                         viewKey,
-                        StringUtils.hasText(viewCSS),
-                        StringUtils.hasText(viewJavaScript),
+                        this.rootKey,
+                        this.hasCSS,
+                        this.hasJavaScript,
                         elements,
                         subViews,
                         scopeAttribute,
@@ -103,8 +129,11 @@ public class View {
         for (final Import i : imports) {
             subView.put(i.name.toLowerCase(), new View(
                     getImportPath(i),
+                    this.rootKey,
                     locale,
-                    ViewOrigin.COMPONENT
+                    ViewOrigin.COMPONENT,
+                    this.hasCSS,
+                    this.hasJavaScript
             ));
         }
         return subView;
