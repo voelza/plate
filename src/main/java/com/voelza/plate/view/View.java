@@ -176,7 +176,8 @@ public class View {
             return "";
         }
 
-        return String.format("const plate = function() {" +
+        return String.format("if(!plateModel){var plateModel = {};}" +
+                        "(() => {" +
                         "function setup(selector, setupFunc) {" +
                         "document" +
                         ".querySelectorAll(selector)" +
@@ -186,7 +187,7 @@ public class View {
                         "});" +
                         "}" +
                         "%s" +
-                        "}();",
+                        "})();",
                 declaredJavaScript + String.join("", jsMap.values()));
     }
 
@@ -280,7 +281,7 @@ public class View {
 
         return Optional.of(
                 String.format(
-                        "<script data-p-props>const plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
+                        "<script data-p-props>var plateModel={%s};document.querySelector('script[data-p-props]').remove();</script>",
                         String.join(
                                 ",",
                                 scriptFillProps.entrySet().stream().map(this::createScriptPropDeclaration).toList()

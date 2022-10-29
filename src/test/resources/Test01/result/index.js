@@ -1,4 +1,5 @@
-const plate = function() {
+if(!plateModel){var plateModel = {};}
+(() => {
     function setup(selector, setupFunc) {
         document
         .querySelectorAll(selector)
@@ -13,4 +14,4 @@ const plate = function() {
         alert("Post Content!");
       }
     });
-}();
+})();
