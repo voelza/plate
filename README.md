@@ -64,7 +64,7 @@ certain parts of your page before you go and fetch heavy data.
 
 ```java
 Model model = new Model();
-Supplier<Integer> messageSupplier = () -> {
+Supplier<String> messageSupplier = () -> {
     try {
         Thread.sleep(1000);
     } catch (InterruptedException e) {
